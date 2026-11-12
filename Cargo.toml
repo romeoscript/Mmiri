@@ -1,0 +1,31 @@
+[workspace]
+members = ["contracts/market", "contracts/usdc"]
+# The oracle targets wasm32-wasip2 and pulls a WASI HTTP stack that must not
+# take part in feature unification with the contracts. It builds on its own.
+exclude = ["oracle"]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/romeoscript/Mmiri"
+
+[workspace.dependencies]
+near-sdk = "5.30.1"
+near-contract-standards = "5.30.1"
+near-workspaces = "0.24.0"
+serde_json = "1"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+anyhow = "1"
+hex = "0.4"
+sha2 = "0.10"
+
+# Contracts are deployed as wasm; optimise for size and strip panic machinery.
+[profile.release]
+codegen-units = 1
+opt-level = "z"
+lto = true
+debug = false
+panic = "abort"
+overflow-checks = true

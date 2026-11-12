@@ -1,0 +1,27 @@
+[package]
+name = "mmiri-market"
+description = "Mmiri: sealed-bid rainfall cover market, escrow, collateral ledger and NEP-171 policies"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+near-sdk.workspace = true
+near-contract-standards.workspace = true
+hex.workspace = true
+
+[dev-dependencies]
+# near-sdk refuses to compile for the host target without this feature; it is what
+# makes `cargo test` (unit tests and the sandbox suite) possible alongside the
+# wasm32 contract build.
+near-sdk = { workspace = true, features = ["unit-testing"] }
+near-workspaces.workspace = true
+tokio.workspace = true
+anyhow.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+hex.workspace = true
