@@ -111,13 +111,14 @@ No network, no keys, no LLM. 20 buyers, 5 underwriters, 8 Nigerian sites, season
 fixed seed. Output:
 
 ```
-  agent         won  bid  decl   premiums     claims    loss    capital     profit
-  uw-1 Longrun  241  267    33    3033.49    4930.00    163%     103.49   -1896.51
-  uw-2 Recent    35  300     0     326.15     160.00     49%    2166.15     166.15
-  uw-3 Blend      2  300     0      43.25     130.00    301%    1913.25     -86.75
-  uw-4 Cautious   0  300     0       0.00       0.00     n/a    2000.00       0.00
-  uw-5 Capacity  20  300     0     369.46     420.00    114%    1949.46     -50.54
-
+  agent            won  bid  decl   premiums     claims    loss    capital     profit
+  -----------------------------------------------------------------------------------
+  uw-1 Longrun     241  267    33    3033.49    4930.00    163%     103.49   -1896.51
+  uw-2 Recent       35  300     0     326.15     160.00     49%    2166.15     166.15
+  uw-3 Blend         2  300     0      43.25     130.00    301%    1913.25     -86.75
+  uw-4 Cautious      0  300     0       0.00       0.00     n/a    2000.00       0.00
+  uw-5 Capacity     20  300     0     369.46     420.00    114%    1949.46     -50.54
+  -----------------------------------------------------------------------------------
   300 rounds · 298 cleared · 2 found no bid · 111 paid out (37% of cleared)
 ```
 

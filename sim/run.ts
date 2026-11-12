@@ -353,7 +353,7 @@ console.log();
 
 console.log(
   "  " +
-    pad("agent", 12) +
+    pad("agent", 15) +
     padL("won", 5) +
     padL("bid", 5) +
     padL("decl", 6) +
@@ -363,12 +363,12 @@ console.log(
     padL("capital", 11) +
     padL("profit", 11),
 );
-console.log("  " + "-".repeat(80));
+console.log("  " + "-".repeat(83));
 for (const r of results) {
   const loss = r.loss_ratio === null ? "   n/a" : `${(r.loss_ratio * 100).toFixed(0)}%`;
   console.log(
     "  " +
-      pad(`${r.account} ${r.label}`, 12) +
+      pad(`${r.account} ${r.label}`, 15) +
       padL(String(r.rounds_won), 5) +
       padL(String(r.rounds_bid), 5) +
       padL(String(r.rounds_declined), 6) +
@@ -379,7 +379,7 @@ for (const r of results) {
       padL(fmtUsdc(BigInt(r.profit)), 11),
   );
 }
-console.log("  " + "-".repeat(80));
+console.log("  " + "-".repeat(83));
 console.log(
   `  ${rounds.length} rounds · ${cleared.length} cleared · ` +
     `${rounds.length - cleared.length} found no bid · ${paid.length} paid out ` +

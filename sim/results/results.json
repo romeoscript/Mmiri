@@ -13,7 +13,7 @@
    25
   ],
   "fixture_pulled_at": "2026-11-12T10:11:20.844Z",
-  "generated_at": "2026-11-12T12:56:21.603Z",
+  "generated_at": "2026-11-12T13:14:14.781Z",
   "note": "Deterministic: same seed, same fixture, same output. No network and no LLM calls. Pricing comes from agents/pricing, the same module the live agents use."
  },
  "summary": {
