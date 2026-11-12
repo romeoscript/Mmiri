@@ -32,3 +32,6 @@ dist/
 # pnpm
 .pnpm-debug.log*
 oracle/target/
+
+# Agent bid salts — needed between commit and reveal, never committed.
+.mmiri/

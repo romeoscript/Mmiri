@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Print every access key on the agent accounts, straight from the chain.
+#
+#   scripts/print-key-permissions
+#
+# THREAT_MODEL.md T15 claims an agent's key cannot move capital. This is how you check
+# that claim instead of taking it on faith: look for `FunctionCall`, a receiver_id equal
+# to the market contract, and a method_names list that does NOT contain `withdraw`.
+#
+# A `FullAccess` key on any of these accounts would be a finding.
+. "$(dirname "$0")/_lib.sh"
+require_cli
+need_parent
+
+for a in "${AGENTS[@]}" "$(basename "$KEEPER" ".$MMIRI_PARENT")"; do
+  id="$a.$MMIRI_PARENT"
+  printf '\n--- %s ---\n' "$id"
+  near account list-keys "$id" "${NET[@]}" 2>&1 || echo "    (account not found)"
+done
+
+cat <<'EOT'
+
+What to look for:
+  permission = FunctionCall          not FullAccess
+  receiver_id = the market contract  and nothing else
+  method_names = commit_bid, reveal_bid
+      -- `withdraw` must be absent. A key that could call it could drain the agent.
+  allowance                          caps what the key can ever spend on gas
+
+A function-call key cannot attach NEAR to a call, cannot transfer, and cannot add
+further keys, so an account holding only these cannot move its own balance.
+EOT

@@ -10,12 +10,16 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "fixture": "node scripts/build-fixture.mjs",
-    "verify-oracle": "tsx scripts/verify-oracle.ts"
+    "verify-oracle": "tsx scripts/verify-oracle.ts",
+    "agent": "tsx agents/run.ts"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
+  },
+  "dependencies": {
+    "near-api-js": "^7.5.3"
   }
 }

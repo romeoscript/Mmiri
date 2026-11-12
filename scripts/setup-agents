@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+# Create the five underwriter sub-accounts, fund them, and lock them down.
+#
+#   scripts/setup-agents
+#
+# The order here is not arbitrary, and it is worth understanding before changing it.
+#
+# A function-call access key cannot attach NEAR to a call. `ft_transfer_call` — the only
+# way to get capital into the market — requires exactly 1 yoctoNEAR. So an agent that
+# holds *only* a function-call key can never fund itself. The capital has to go in while
+# the account still has a full-access key.
+#
+# Hence: create, fund, deposit, grant the scoped key, then DELETE the full-access key.
+# The agent ends up able to bid and nothing else, and the full-access key existed only
+# for the minutes this script was running under your hand. That is exactly the rule —
+# full-access keys in setup, never in anything long-running.
+#
+# Verify the end state with scripts/print-key-permissions.
+. "$(dirname "$0")/_lib.sh"
+require_cli
+need_parent
+
+# `withdraw` is deliberately absent. A stolen agent key can bid badly; it cannot take
+# the capital out.
+METHODS="commit_bid,reveal_bid"
+CAPITAL="300000000"   # 300 USDC each
+
+say "creating underwriter accounts"
+for a in "${AGENTS[@]}"; do
+  ensure_account "$a.$MMIRI_PARENT" "3 NEAR"
+done
+ensure_account "$KEEPER" "2 NEAR"
+
+say "registering each agent on the USDC contract and minting its capital"
+for a in "${AGENTS[@]}"; do
+  id="$a.$MMIRI_PARENT"
+  near contract call-function as-transaction "$USDC" storage_deposit \
+    json-args "{\"account_id\":\"$id\",\"registration_only\":true}" \
+    prepaid-gas '30 Tgas' attached-deposit '0.01 NEAR' \
+    sign-as "$MMIRI_PARENT" "${NET[@]}" "${SIGN[@]}"
+
+  near contract call-function as-transaction "$USDC" mint \
+    json-args "{\"account_id\":\"$id\",\"amount\":\"$CAPITAL\"}" \
+    prepaid-gas '30 Tgas' attached-deposit '0 NEAR' \
+    sign-as "$MMIRI_PARENT" "${NET[@]}" "${SIGN[@]}"
+done
+
+say "each agent deposits its capital into the market (needs its full-access key)"
+for a in "${AGENTS[@]}"; do
+  id="$a.$MMIRI_PARENT"
+  echo "    $id -> $MARKET"
+  near contract call-function as-transaction "$USDC" ft_transfer_call \
+    json-args "{\"receiver_id\":\"$MARKET\",\"amount\":\"$CAPITAL\",\"msg\":\"\\\"Deposit\\\"\"}" \
+    prepaid-gas '100 Tgas' attached-deposit '1 yoctoNEAR' \
+    sign-as "$id" "${NET[@]}" "${SIGN[@]}"
+done
+
+say "granting each agent a function-call key scoped to $MARKET ($METHODS)"
+for a in "${AGENTS[@]}"; do
+  id="$a.$MMIRI_PARENT"
+  echo "    $id"
+  near account add-key "$id" grant-function-call-access \
+    --allowance '0.25 NEAR' \
+    --contract-account-id "$MARKET" \
+    --function-names "$METHODS" \
+    autogenerate-new-keypair save-to-keychain \
+    "${NET[@]}" "${SIGN[@]}"
+done
+
+say "granting the keeper a key scoped to submit_observation only"
+near account add-key "$KEEPER" grant-function-call-access \
+  --allowance '0.25 NEAR' \
+  --contract-account-id "$MARKET" \
+  --function-names 'submit_observation' \
+  autogenerate-new-keypair save-to-keychain \
+  "${NET[@]}" "${SIGN[@]}"
+
+say "removing the full-access keys — this is the step that makes the claim true"
+for a in "${AGENTS[@]}" "$(basename "$KEEPER" ".$MMIRI_PARENT")"; do
+  id="$a.$MMIRI_PARENT"
+  keys="$(full_access_keys "$id" || true)"
+  if [ -z "$keys" ]; then
+    echo "    $id has no full-access key already"
+    continue
+  fi
+  while IFS= read -r pk; do
+    [ -z "$pk" ] && continue
+    echo "    deleting $pk from $id"
+    near account delete-keys "$id" public-keys "$pk" "${NET[@]}" "${SIGN[@]}"
+  done <<< "$keys"
+done
+
+say "done"
+cat <<EOT
+
+Each agent now holds one function-call key, scoped to $MARKET and to
+$METHODS. It cannot transfer NEAR, add keys, call any other contract, or
+withdraw its capital.
+
+Check it rather than believe it:
+    scripts/print-key-permissions
+
+EOT

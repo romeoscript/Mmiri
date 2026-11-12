@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+# Create the sub-accounts, deploy both contracts and fund the demo. Run by hand.
+#
+#   scripts/setup
+#
+# This is the one script that uses your full-access key, and it is why the agents never
+# need one. Nothing here runs unattended: every signature is yours.
+#
+# Re-runnable: accounts that already exist are left alone.
+. "$(dirname "$0")/_lib.sh"
+require_cli
+need_parent
+
+say "building contracts"
+cargo build --target wasm32-unknown-unknown --release
+
+say "creating contract accounts under $MMIRI_PARENT"
+ensure_account "$USDC" "10 NEAR"
+ensure_account "$MARKET" "20 NEAR"
+ensure_account "$KEEPER" "2 NEAR"
+
+say "deploying mock USDC to $USDC"
+near contract deploy "$USDC" \
+  use-file target/wasm32-unknown-unknown/release/mmiri_usdc.wasm \
+  with-init-call new json-args "{\"owner_id\":\"$MMIRI_PARENT\",\"total_supply\":\"0\"}" \
+  prepaid-gas '100 Tgas' attached-deposit '0 NEAR' "${NET[@]}" "${SIGN[@]}"
+
+say "deploying market to $MARKET"
+# demo_mode=true so a real season (2025 pays, 2026 expires) can be replayed before the
+# hackathon deadline. It relaxes invariant 6 and nothing else. settle_delay_days=4
+# because NASA's near-real-time data lags about three days and a failed OutLayer run is
+# not refunded.
+near contract deploy "$MARKET" \
+  use-file target/wasm32-unknown-unknown/release/mmiri_market.wasm \
+  with-init-call new json-args "{
+    \"owner_id\":\"$MMIRI_PARENT\",
+    \"usdc_account\":\"$USDC\",
+    \"outlayer_account\":\"${OUTLAYER_CONTRACT:-outlayer.testnet}\",
+    \"keeper_account\":\"$KEEPER\",
+    \"oracle_wasm_url\":\"${ORACLE_WASM_URL:-}\",
+    \"oracle_wasm_sha256\":\"${ORACLE_WASM_SHA256:-}\",
+    \"commit_seconds\":60,
+    \"reveal_seconds\":60,
+    \"settle_delay_days\":4,
+    \"bid_bond\":\"1000000\",
+    \"demo_mode\":true
+  }" \
+  prepaid-gas '100 Tgas' attached-deposit '0 NEAR' "${NET[@]}" "${SIGN[@]}"
+
+say "registering storage and minting demo USDC"
+for who in "$MARKET" "$MMIRI_PARENT"; do
+  near contract call-function as-transaction "$USDC" storage_deposit \
+    json-args "{\"account_id\":\"$who\",\"registration_only\":true}" \
+    prepaid-gas '30 Tgas' attached-deposit '0.01 NEAR' \
+    sign-as "$MMIRI_PARENT" "${NET[@]}" "${SIGN[@]}"
+done
+
+near contract call-function as-transaction "$USDC" mint \
+  json-args "{\"account_id\":\"$MMIRI_PARENT\",\"amount\":\"100000000\"}" \
+  prepaid-gas '30 Tgas' attached-deposit '0 NEAR' \
+  sign-as "$MMIRI_PARENT" "${NET[@]}" "${SIGN[@]}"
+
+say "done"
+cat <<EOT
+
+  market   $MARKET
+  usdc     $USDC
+  keeper   $KEEPER
+
+Next:
+  scripts/setup-agents          create the five underwriters and their function-call keys
+  scripts/print-key-permissions show what those keys can and cannot do
+  scripts/demo                  run one full round end to end
+
+EOT

@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+# One full round on testnet, start to finish.
+#
+#   scripts/demo
+#
+# Opens a round on a real season, lets the five agents bid against each other, finalizes,
+# settles from the rainfall record, and shows who was paid. Takes about three minutes,
+# most of it waiting for the commit and reveal windows to close — those are real
+# deadlines enforced by the contract, not a sleep for show.
+#
+# Defaults to Enugu, 30 days from 15 April 2025. That window totalled 53.6 mm against a
+# 60 mm strike, so the policy pays. Pass 2026 to watch one expire instead: 113.7 mm.
+#
+# Needs scripts/setup and scripts/setup-agents to have been run first.
+. "$(dirname "$0")/_lib.sh"
+require_cli
+need_parent
+
+SEASON="${1:-2025}"
+START="${SEASON}0415"
+STRIKE=600          # 60.0 mm
+PAYOUT=50000000     # 50 USDC
+MAX_PREMIUM=25000000 # the buyer will pay up to 25 USDC
+
+view() {
+  near contract call-function as-read-only "$MARKET" "$1" json-args "${2:-{\}}" \
+    network-config "$NEAR_NETWORK" now 2>/dev/null
+}
+
+say "opening a round — Enugu, 30 days from 15 April $SEASON, ${STRIKE}/10 mm strike"
+TERMS="{\"lat_e4\":64500,\"lon_e4\":75100,\"start\":$START,\"days\":30,\"strike_mm_x10\":$STRIKE,\"payout\":\"$PAYOUT\"}"
+MSG=$(printf '{"RequestCover":{"terms":%s}}' "$TERMS")
+
+near contract call-function as-transaction "$USDC" ft_transfer_call \
+  json-args "$(printf '{"receiver_id":"%s","amount":"%s","msg":%s}' "$MARKET" "$MAX_PREMIUM" "$(printf '%s' "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')")" \
+  prepaid-gas '100 Tgas' attached-deposit '1 yoctoNEAR' \
+  sign-as "$MMIRI_PARENT" "${NET[@]}" "${SIGN[@]}"
+
+ROUND=$(view get_rounds '{"limit":200}' | python3 -c '
+import json,sys
+try:
+    rounds=json.loads(sys.stdin.read().strip() or "[]")
+    print(rounds[-1]["id"] if rounds else "")
+except Exception:
+    print("")
+')
+if [ -z "$ROUND" ]; then
+  echo "Could not read the new round id. Check: near contract call-function as-read-only $MARKET get_rounds json-args '{}' network-config $NEAR_NETWORK now" >&2
+  exit 1
+fi
+say "round $ROUND is open"
+
+say "what each agent thinks this risk is worth"
+pnpm -s agent all quote "$ROUND" || true
+
+say "agents commit sealed bids"
+pnpm -s agent all bid "$ROUND"
+
+say "waiting for the commit window to close (60s)"
+sleep 65
+
+say "agents reveal"
+pnpm -s agent all reveal "$ROUND"
+
+say "waiting for the reveal window to close (60s)"
+sleep 65
+
+say "finalizing — lowest revealed premium at or under the buyer's maximum wins"
+near contract call-function as-transaction "$MARKET" finalize_round \
+  json-args "{\"round_id\":\"$ROUND\"}" \
+  prepaid-gas '100 Tgas' attached-deposit '0 NEAR' \
+  sign-as "$MMIRI_PARENT" "${NET[@]}" "${SIGN[@]}"
+
+say "the policy"
+view get_policy "{\"policy_id\":\"$ROUND\"}"
+
+say "recomputing the rainfall from the public record"
+pnpm -s verify-oracle --lat 6.45 --lon 7.51 --start "$START" --days 30
+
+READING=$(pnpm -s verify-oracle --lat 6.45 --lon 7.51 --start "$START" --days 30 \
+  | grep 'mm_x10 = ' | head -1 | sed 's/.*mm_x10 = \([0-9]*\).*/\1/')
+
+say "settling with the keeper (mm_x10 = $READING)"
+near contract call-function as-transaction "$MARKET" submit_observation \
+  json-args "{\"policy_id\":\"$ROUND\",\"mm_x10\":$READING,\"days_valid\":30}" \
+  prepaid-gas '100 Tgas' attached-deposit '0 NEAR' \
+  sign-as "$KEEPER" "${NET[@]}" "${SIGN[@]}"
+
+say "after settlement"
+view get_policy "{\"policy_id\":\"$ROUND\"}"
+
+say "the contract's books"
+view solvency
+
+cat <<EOT
+
+Round $ROUND is done.
+
+  Explorer: https://testnet.nearblocks.io/address/$MARKET
+  Policy:   the NFT is token id $ROUND — check nft_token to see who holds it
+
+Check the settlement against the public record yourself:
+  pnpm verify-oracle --policy $ROUND
+
+EOT

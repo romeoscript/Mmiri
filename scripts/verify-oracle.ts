@@ -36,7 +36,9 @@ function parseArgs(argv: string[]): Args {
     const v = argv[i + 1];
     if (!k?.startsWith("--")) continue;
     const name = k.slice(2);
-    if (name === "policy") a.policy = v;
+    if (name === "policy") {
+      if (v !== undefined) a.policy = v;
+    }
     else if (name === "lat") a.lat = Number(v);
     else if (name === "lon") a.lon = Number(v);
     else if (name === "start") a.start = Number(v);
