@@ -21,18 +21,21 @@ pub const BOND: u128 = USDC;
 /// Every policy in the suite pays 50 USDC.
 pub const PAYOUT: u128 = 50 * USDC;
 
-/// Short phases so tests can fast-forward through them quickly.
-pub const COMMIT_SECONDS: u32 = 2;
-/// Wide enough that `ff_past` always lands inside it (it advances in whole blocks, so
-/// a 2-second window is easy to jump straight over) and narrow enough that stepping
-/// past it afterwards stays quick.
-pub const REVEAL_SECONDS: u32 = 10;
+/// Phase lengths must comfortably exceed the WALL-CLOCK time the test spends inside
+/// them, not just be short enough to fast-forward. A 2-second commit window looked fine
+/// and passed most runs, but three sequential commit transactions take longer than that
+/// in the sandbox, so the third was intermittently rejected for arriving after the
+/// deadline. A suite that fails one run in three is worse than a slow one.
+pub const COMMIT_SECONDS: u32 = 30;
+/// Same reasoning as the commit window: long enough for several reveal transactions,
+/// and wide enough that `ff_past` lands inside it rather than stepping clean over.
+pub const REVEAL_SECONDS: u32 = 30;
 pub const SETTLE_DELAY_DAYS: u16 = 4;
 
 /// Block chunk used when stepping toward a deadline. Sandbox blocks run a little under
-/// half a second, so this steps the clock in ~1s hops: fine enough to land inside a
-/// 10-second window, coarse enough to cross it in a handful of calls.
-pub const FF_CHUNK: u64 = 2;
+/// half a second, so this steps the clock in ~4s hops — coarse enough to cross a
+/// 30-second window quickly, fine enough to land well inside it.
+pub const FF_CHUNK: u64 = 10;
 
 fn wasm(name: &str) -> anyhow::Result<Vec<u8>> {
     let path = format!("../../target/wasm32-unknown-unknown/release/{name}.wasm");
