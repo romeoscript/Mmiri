@@ -98,3 +98,14 @@ and exits if it fails. This development container caps the hard limit at 20000 w
 reports success for that one call. A normal machine's limit is well above 65535, so
 `scripts/test` needs nothing special there. Nothing about this is in the repository: it is
 a property of where this was built, not of what was built.
+- **`sim/results/results.json` is committed.** It is deterministic — same seed, same
+  fixture, same bytes, and `sim/sim.test.ts` asserts that by running the command twice and
+  comparing — so committing it costs nothing in trust and lets a reviewer (and the web app)
+  see the outcome without running anything first. `pnpm sim` regenerates it.
+- **The simulation applies the contract's auction rule, not a simplified one.** Lowest
+  eligible bid wins, ties break on the earlier commit (here the agents' fixed order), and
+  a bid above the buyer's maximum is not eligible. A test re-derives the winner of all 300
+  rounds from the recorded bids, so the sim cannot drift from RULES.md §4 unnoticed.
+- **Underwriters' books are carried across seasons, including the concentration limit.**
+  Capacity's load rises as its book fills, which is why it stops winning late in a season
+  and Recent picks up business — emergent, not scripted.
