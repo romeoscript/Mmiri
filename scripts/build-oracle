@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Build the oracle component and print the sha256 the contract pins.
+#
+#   scripts/build-oracle
+#
+# The hash matters: `market.new(...)` stores it, and OutLayer's worker refuses to run a
+# binary whose bytes do not match. That is what makes "did the right code run" a settled
+# question rather than a matter of trust. Re-run this and update the contract's config
+# whenever the oracle changes.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+echo "==> building oracle for wasm32-wasip2"
+cargo build --release --target wasm32-wasip2 --manifest-path oracle/Cargo.toml
+
+WASM=oracle/target/wasm32-wasip2/release/mmiri-oracle.wasm
+SHA=$(sha256sum "$WASM" | cut -d' ' -f1)
+SIZE=$(wc -c < "$WASM")
+
+echo
+echo "  file    $WASM"
+echo "  bytes   $SIZE"
+echo "  sha256  $SHA"
+echo
+echo "Publish the file somewhere OutLayer can fetch it over https, then set both:"
+echo "  ORACLE_WASM_URL=<published url>"
+echo "  ORACLE_WASM_SHA256=$SHA"
+echo
+echo "Check the logic without a runtime:   cargo test --manifest-path oracle/Cargo.toml"

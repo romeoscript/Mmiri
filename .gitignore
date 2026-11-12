@@ -31,3 +31,4 @@ dist/
 
 # pnpm
 .pnpm-debug.log*
+oracle/target/

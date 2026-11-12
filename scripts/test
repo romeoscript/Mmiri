@@ -17,5 +17,11 @@ cargo build --target wasm32-unknown-unknown --release
 echo "==> unit tests"
 cargo test --lib "$@"
 
+# The oracle is outside the workspace (it targets wasm32-wasip2 and pulls a WASI HTTP
+# stack), so it needs its own invocation. Its arithmetic runs on the host; only the fetch
+# is WASI-specific.
+echo "==> oracle tests"
+cargo test --manifest-path oracle/Cargo.toml "$@"
+
 echo "==> integration tests (one sandbox at a time)"
 cargo test --test smoke --test invariants "$@" -- --test-threads=1

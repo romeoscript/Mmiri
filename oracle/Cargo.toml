@@ -1,0 +1,22 @@
+[package]
+name = "mmiri-oracle"
+description = "Reads terms on stdin, fetches NASA POWER rainfall, prints the window total"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+
+# Outside the contracts' workspace on purpose: this targets wasm32-wasip2 and pulls a
+# WASI HTTP stack that must not take part in feature unification with near-sdk.
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wstd = "0.6.8"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+strip = true
