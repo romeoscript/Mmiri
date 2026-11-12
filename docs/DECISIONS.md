@@ -56,3 +56,45 @@ One line per non-obvious choice, newest last. This feeds the README's disclosure
   API's own numbers and asserts no fee rate.
 - **All ten pricing vectors and all four window totals in the brief reproduce exactly** from live NASA
   data. Enugu breaches 60 mm in 7 of 45 seasons (1981–2025) and 4 of the last 15, as stated.
+
+## 2026-11-12 — building the contracts
+
+- **No `panic = "abort"` in the release profile.** near-sdk surfaces failure messages
+  through a std panic hook, and `abort` bypasses hooks entirely — every `require!` then
+  reaches the caller as a bare "unreachable opcode" with no explanation. Found this while
+  debugging a test: the message for "reveal window has closed" was simply absent. Dropping
+  `abort` costs about 2 KB of wasm (685 KB → 687 KB) and is the right trade for a contract
+  people interact with directly.
+- **`overflow-checks = true` kept on.** Silently wrapping arithmetic in a ledger is far
+  worse than a failed transaction.
+- **NEP-141/145 traits written out by hand in the USDC mock.** `impl_fungible_token_core!`
+  and `impl_fungible_token_storage!` are both deprecated in near-contract-standards
+  5.30.1, and the storage macro no longer compiles: it generates
+  `storage_withdraw(Option<U128>)` against a trait that now takes `Option<NearToken>`.
+  The crate's own deprecation note says to implement the traits directly.
+- **NEP-171 implemented directly rather than wrapping `NonFungibleToken`.** The standard's
+  struct carries approval storage we deliberately do not want, and the policy map already
+  holds the owner, so a transfer is a single map write. Change methods stay O(1); only
+  enumeration views iterate, and they paginate.
+- **`owner_id` lives on the `Policy`.** One field, read at callback time, is the whole of
+  invariant 4. It also means no separate owner index to keep consistent.
+- **Integration tests run one at a time** (`scripts/test`). Each starts its own sandbox
+  node; seven at once contend for ports and descriptors and the suite goes flaky —
+  invariant 1 failed in parallel and passed alone. Serial takes ~2 minutes and always
+  tells the truth.
+- **Test reveal window is 10 seconds, stepped in ~1-second hops.** `fast_forward` moves in
+  whole blocks, so a 2-second window is easy to jump clean over. `ff_past` polls the block
+  clock and steps until it is past a deadline, which is robust to block timing instead of
+  guessing a block count.
+- **The test harness recomputes the commit hash independently of the contract.** If
+  `commit_preimage` and the test's `commit_hash` ever disagree, every reveal test fails.
+  That is the alarm we want.
+
+### Environment note, not a project decision
+
+The NEAR sandbox (`neard` 2.14.0) calls `setrlimit64(RLIMIT_NOFILE, 65535)` unconditionally
+and exits if it fails. This development container caps the hard limit at 20000 with
+`CAP_SYS_RESOURCE` masked, so the sandbox cannot start without an `LD_PRELOAD` shim that
+reports success for that one call. A normal machine's limit is well above 65535, so
+`scripts/test` needs nothing special there. Nothing about this is in the repository: it is
+a property of where this was built, not of what was built.

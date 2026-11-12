@@ -21,11 +21,20 @@ anyhow = "1"
 hex = "0.4"
 sha2 = "0.10"
 
-# Contracts are deployed as wasm; optimise for size and strip panic machinery.
+# Contracts are deployed as wasm; optimise for size.
+#
+# Deliberately NOT `panic = "abort"`. near-sdk surfaces failure messages through a
+# std panic hook, and `abort` bypasses hooks entirely -- every require! and every
+# arithmetic overflow then reaches the caller as a bare "unreachable opcode" with no
+# explanation. A judge or a farmer hitting "reveal window has closed" should be told
+# that, and an overflow should name itself in a test rather than hide. The cost is a
+# few KB of wasm, which is the right trade for a contract people interact with.
+#
+# overflow-checks stays on: silently wrapping arithmetic in a ledger is far worse
+# than a failed transaction.
 [profile.release]
 codegen-units = 1
 opt-level = "z"
 lto = true
 debug = false
-panic = "abort"
 overflow-checks = true

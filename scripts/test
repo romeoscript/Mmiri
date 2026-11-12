@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Build the contracts, then run every test. No network, no keys, no testnet.
+#
+# Two things this does that a bare `cargo test` does not:
+#
+#  1. Builds the wasm first. The integration suite loads the compiled contracts from
+#     target/, so the build has to happen before the tests run.
+#  2. Runs the integration tests one at a time. Each one starts its own NEAR sandbox
+#     node; several at once contend for ports and file descriptors and the suite goes
+#     flaky. Serial is slower and always tells the truth.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+echo "==> building contracts for wasm32-unknown-unknown"
+cargo build --target wasm32-unknown-unknown --release
+
+echo "==> unit tests"
+cargo test --lib "$@"
+
+echo "==> integration tests (one sandbox at a time)"
+cargo test --test smoke --test invariants "$@" -- --test-threads=1
