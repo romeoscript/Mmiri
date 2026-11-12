@@ -24,7 +24,7 @@ import {
   windowTotal,
   type Fixture,
   type Terms,
-} from "./index.js";
+} from "./index";
 
 const fixture = JSON.parse(
   readFileSync(new URL("../../sim/fixtures/rainfall.json", import.meta.url), "utf8"),

@@ -31,7 +31,7 @@ import {
   type SeasonOutcome,
   type StrategyId,
   type Terms,
-} from "../agents/pricing/index.js";
+} from "../agents/pricing/index";
 
 // ---------------------------------------------------------------------------
 // Parameters. All fixed: the point is reproducibility.

@@ -1,0 +1,422 @@
+/*
+ * Mmiri — one stylesheet, no framework.
+ *
+ * Colours are the validated default data-viz palette. The chart roles were checked with
+ * the palette validator in both modes before being written down here: series blue against
+ * status critical measures CVD ΔE 23.8 light / 25.7 dark and normal-vision 31.6 / 31.9,
+ * well clear of the 8 and 15 floors.
+ *
+ * Dark mode is declared twice on purpose: the media query covers the OS setting, the
+ * [data-theme] scope covers an explicit choice, and the :not() guard lets an explicit
+ * light setting beat OS dark.
+ */
+
+:root {
+  color-scheme: light;
+
+  --page: #f9f9f7;
+  --surface-1: #fcfcfb;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #898781;
+  --grid: #e1e0d9;
+  --axis: #c3c2b7;
+  --border: rgba(11, 11, 11, 0.1);
+
+  /* Chart roles */
+  --series-1: #2a78d6;
+  --status-critical: #d03b3b;
+  --status-good: #0ca30c;
+  --status-warning: #fab219;
+  --status-serious: #ec835a;
+  --success-text: #006300;
+
+  --radius: 10px;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --page: #0d0d0d;
+    --surface-1: #1a1a19;
+    --text-primary: #f0efec;
+    --text-secondary: #c3c2b7;
+    --text-muted: #898781;
+    --grid: #2c2c2a;
+    --axis: #383835;
+    --border: rgba(255, 255, 255, 0.1);
+    --series-1: #3987e5;
+    --success-text: #0ca30c;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d;
+  --surface-1: #1a1a19;
+  --text-primary: #f0efec;
+  --text-secondary: #c3c2b7;
+  --text-muted: #898781;
+  --grid: #2c2c2a;
+  --axis: #383835;
+  --border: rgba(255, 255, 255, 0.1);
+  --series-1: #3987e5;
+  --success-text: #0ca30c;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  max-width: 100%;
+}
+
+body {
+  background: var(--page);
+  color: var(--text-primary);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--series-1);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/* ---------------- layout ---------------- */
+
+.shell {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0 16px 72px;
+}
+
+header.top {
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-1);
+  margin-bottom: 28px;
+}
+header.top .inner {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 14px 16px;
+  display: flex;
+  align-items: baseline;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.brand {
+  font-weight: 650;
+  font-size: 17px;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+.brand span {
+  font-weight: 400;
+  color: var(--text-muted);
+  font-size: 13px;
+  margin-left: 8px;
+}
+nav.main {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 14px;
+}
+nav.main a {
+  color: var(--text-secondary);
+}
+nav.main a[aria-current="page"] {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+h1 {
+  font-size: 26px;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  margin: 24px 0 6px;
+}
+h2 {
+  font-size: 18px;
+  margin: 32px 0 10px;
+  letter-spacing: -0.01em;
+}
+h3 {
+  font-size: 15px;
+  margin: 20px 0 8px;
+}
+p.lede {
+  color: var(--text-secondary);
+  margin: 0 0 20px;
+  max-width: 68ch;
+}
+p {
+  max-width: 72ch;
+}
+
+.card {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  margin: 16px 0;
+  /* Wide tables scroll inside their own card rather than pushing the page sideways.
+     A phone-width reviewer should never meet a horizontal page scrollbar. */
+  overflow-x: auto;
+}
+.card > h2:first-child,
+.card > h3:first-child {
+  margin-top: 0;
+}
+
+.grid {
+  display: grid;
+  gap: 14px;
+}
+@media (min-width: 720px) {
+  .grid.cols-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+  .grid.cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .grid.cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ---------------- stat tiles ---------------- */
+
+.tile {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+.tile .label {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: none;
+  margin-bottom: 4px;
+}
+.tile .value {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+.tile .note {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* ---------------- tables ---------------- */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 12px;
+  padding: 6px 14px 6px 0;
+  border-bottom: 1px solid var(--axis);
+  white-space: nowrap;
+}
+td {
+  padding: 7px 14px 7px 0;
+  border-bottom: 1px solid var(--grid);
+  vertical-align: top;
+}
+/* Every cell keeps a right gutter; only the last one in a row gives it up. Without
+   this, a right-aligned numeric column runs straight into the next column's text. */
+th:last-child,
+td:last-child {
+  padding-right: 0;
+}
+td.num,
+th.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+tr:last-child td {
+  border-bottom: none;
+}
+.mono {
+  font-family: var(--mono);
+  font-size: 12.5px;
+}
+
+/* ---------------- chips ---------------- */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  white-space: nowrap;
+}
+.chip .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+/* ---------------- charts ---------------- */
+
+.chart-wrap {
+  position: relative;
+}
+.chart-wrap svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.chart-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.chart-sub {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+.legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  margin-top: 10px;
+}
+.legend .item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.legend .swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.tip {
+  position: absolute;
+  pointer-events: none;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  z-index: 5;
+  white-space: nowrap;
+  transform: translate(-50%, -100%);
+}
+.tip .k {
+  color: var(--text-muted);
+}
+.tip b {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------- forms ---------------- */
+
+label.field {
+  display: block;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+select,
+input[type="number"],
+input[type="text"] {
+  font: inherit;
+  font-size: 14px;
+  padding: 7px 9px;
+  border-radius: 8px;
+  border: 1px solid var(--axis);
+  background: var(--surface-1);
+  color: var(--text-primary);
+  width: 100%;
+}
+button {
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: var(--series-1);
+  color: #ffffff;
+  cursor: pointer;
+}
+button:hover {
+  filter: brightness(1.06);
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: none;
+}
+button.secondary {
+  background: var(--surface-1);
+  color: var(--text-primary);
+  border-color: var(--axis);
+}
+
+/* ---------------- notices ---------------- */
+
+.notice {
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--status-warning);
+  background: var(--surface-1);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  margin: 14px 0;
+}
+.notice strong {
+  color: var(--text-primary);
+}
+.notice.info {
+  border-left-color: var(--series-1);
+}
+
+.muted {
+  color: var(--text-muted);
+}
+.small {
+  font-size: 12.5px;
+}
+.footnote {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin-top: 28px;
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}

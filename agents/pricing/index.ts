@@ -12,9 +12,9 @@
  * price is reproducible.
  */
 
-import { windowTotal } from "./rainfall.js";
+import { windowTotal } from "./rainfall";
 
-export { windowTotal, paysOut, FILL } from "./rainfall.js";
+export { windowTotal, paysOut, FILL } from "./rainfall";
 
 /** 1 USDC. */
 export const USDC = 1_000_000n;
