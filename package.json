@@ -1,0 +1,21 @@
+{
+  "name": "mmiri",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Sealed-bid rainfall cover on NEAR",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "sim": "tsx sim/run.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "fixture": "node scripts/build-fixture.mjs",
+    "verify-oracle": "tsx scripts/verify-oracle.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

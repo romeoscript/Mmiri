@@ -26,3 +26,6 @@ sim/results/
 # Local scratch
 .DS_Store
 *.log
+
+# pnpm
+.pnpm-debug.log*
