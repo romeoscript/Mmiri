@@ -109,3 +109,35 @@ a property of where this was built, not of what was built.
 - **Underwriters' books are carried across seasons, including the concentration limit.**
   Capacity's load rises as its book fills, which is why it stops winning late in a season
   and Recent picks up business — emergent, not scripted.
+
+## 2026-11-12 — agents, scripts and the README
+
+- **An agent cannot fund itself with a function-call key.** Such a key cannot attach NEAR,
+  and `ft_transfer_call` requires exactly 1 yoctoNEAR. So `scripts/setup-agents` creates each
+  account, funds it, makes it deposit *while it still has a full-access key*, adds the scoped
+  key, and then **deletes the full-access key**. The agent ends up able to bid and nothing
+  else, and the full-access key existed only while the setup script was running by hand.
+  This is the brief's rule arrived at from the other direction, and it is also the reason the
+  order in that script must not be rearranged.
+- **Agents' keys exclude `withdraw`, and `scripts/print-key-permissions` proves it.** A
+  security claim nobody can check is not a security claim.
+- **The commit preimage is pinned by a test in each language.** `agents/commit.test.ts`
+  asserts the exact string that `contracts/market/src/bid.rs`'s test asserts. If either side
+  changes its encoding, the two disagree — which is the only way to catch a drift that would
+  otherwise show up as "every reveal is rejected" on testnet.
+- **Test phase lengths must exceed the wall-clock time spent inside them.** `COMMIT_SECONDS`
+  was 2, and three sequential commit transactions take longer than that in the sandbox, so
+  the third was intermittently rejected — the contract behaving correctly, the test being
+  wrong. It passed most runs, which is worse than failing every run. Now 30s windows with
+  ~4s fast-forward hops, verified by three consecutive clean suites.
+- **The oracle's logic lives in `lib.rs` with no I/O.** The arithmetic that decides whether a
+  farmer gets paid is covered by host `cargo test` rather than only by running a Wasm
+  component. Verified under jco that the component does run and reach its HTTP call; the
+  fetch itself fails in this container because the egress proxy does not reach the WASI shim.
+- **The oracle re-implements calendar arithmetic rather than sharing the contract's.** A
+  fourth crate to share thirty lines of well-known integer date maths would cost more than it
+  saves, and both copies have tests covering leap years and century rules.
+- **The README states what has not been run.** Every testnet script is written and unrun, and
+  it says so in two places. Q-017 has Claude Code and Codex check that features match the
+  README; a README that overpromises fails that check in exactly the way an honest small one
+  does not.
