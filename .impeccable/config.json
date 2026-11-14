@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "oversized-h1",
+        "value": "*",
+        "files": [
+          "brag-output/composition/index.html"
+        ],
+        "createdAt": "2026-11-14T09:33:13.103Z",
+        "reason": "Claude decided: HyperFrames video composition, not a web page. #s1-line1 is a 1920x1080 full-frame title card over a photograph; the rule's above-the-fold rationale does not apply because the scene has no other content by design. Legibility verified in the snapshot contact sheet and by the hyperframes craft audit (0 warnings, 34/34 WCAG AA text checks)."
+      }
+    ]
+  }
+}
