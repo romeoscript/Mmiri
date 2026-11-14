@@ -22,26 +22,28 @@ const SEASON = 2026;
 const PAYOUTS = [30, 50, 80] as const;
 const EXPLORER = "https://testnet.nearblocks.io/address";
 
+// Kept short on purpose: these sit in ~170px columns, where a twenty-word sentence
+// wraps to four characters-per-line short of readable.
 const STEPS = [
   {
     title: "You ask for cover",
-    body: "One place, one 30-day window, and the most you are willing to pay. The maximum goes into escrow with the request.",
+    body: "One place, one 30-day window, your maximum price — escrowed with the request.",
   },
   {
     title: "Agents bid blind",
-    body: "Five underwriters submit a hash of their premium and a secret salt. Nobody can read anyone else's price.",
+    body: "Each underwriter submits a hash of its premium. No one can read a rival's bid.",
   },
   {
     title: "Bids are opened",
-    body: "After the window closes each agent reveals. The contract recomputes the hash, so no bid can change after the fact.",
+    body: "After the window closes, each reveals. The contract rechecks every hash.",
   },
   {
     title: "The lowest price wins",
-    body: "The cheapest revealed premium at or under your maximum takes the risk and locks the full payout as collateral.",
+    body: "Cheapest premium under your maximum takes the risk, and locks the full payout.",
   },
   {
     title: "Rainfall decides",
-    body: "The oracle reads NASA's record for your window. Below the strike, the payout moves. Nobody files a claim.",
+    body: "The oracle reads NASA. Below the strike the payout moves — no claim is filed.",
   },
 ];
 

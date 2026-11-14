@@ -700,9 +700,15 @@ button.secondary {
   width: 100vw;
   margin-left: 50%;
   transform: translateX(-50%);
-  padding: clamp(2.25rem, 4.5vw, 3.5rem) var(--gutter);
+  padding: clamp(2.25rem, 4.5vw, 3.5rem) 0;
   border-top: 1px solid var(--rule);
   border-bottom: 1px solid var(--rule);
+}
+/* Must resolve to the same content box as .shell or every band sits a gutter further
+   left than the page around it. .shell is border-box, so its 1180px includes the
+   gutter; band-inner has to include it the same way rather than add it outside. */
+.band > .band-inner {
+  padding-inline: var(--gutter);
 }
 
 /* ---------------- ledger ----------------
@@ -711,10 +717,21 @@ button.secondary {
    big numbers over small captions, which is the stock metric strip and leaves most of a
    wide viewport empty. */
 
+/* Two columns of rows on a wide screen. One column stretched a label across 900px and
+   threw its figure to the far edge, which reads as two unrelated things rather than a
+   line of a statement. */
 .ledger {
   display: grid;
-  gap: 0;
-  max-width: 62rem;
+  gap: 0 clamp(2rem, 5vw, 4.5rem);
+}
+@media (min-width: 900px) {
+  .ledger {
+    grid-template-columns: 1fr 1fr;
+  }
+  /* With two columns the top rule belongs to the first row of each, not just row one. */
+  .ledger-row:nth-child(2) {
+    border-top: 1px solid var(--rule-strong);
+  }
 }
 .ledger-row {
   display: grid;
@@ -948,7 +965,7 @@ button.secondary {
 @media (min-width: 860px) {
   .steps {
     grid-template-columns: repeat(5, 1fr);
-    gap: 1.25rem;
+    gap: clamp(1.25rem, 2.5vw, 2.25rem);
   }
 }
 .step {
