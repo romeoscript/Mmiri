@@ -705,6 +705,87 @@ button.secondary {
   margin-bottom: clamp(1rem, 2vw, 1.5rem);
 }
 
+.rain-field {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+  mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
+}
+
+/* ---------------- site map ---------------- */
+
+.sitemap svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.sitemap .grat {
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+.sitemap .grat-label {
+  fill: var(--silt-dim);
+  font-size: 9px;
+}
+.sitemap .outline {
+  fill: color-mix(in srgb, var(--rain) 7%, transparent);
+  stroke: var(--rule-strong);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+.sitemap a {
+  text-decoration: none;
+}
+.sitemap .dot {
+  fill: var(--silt);
+  transition: fill 180ms ease, r 180ms ease;
+}
+.sitemap .site-label {
+  fill: var(--silt);
+  font-size: 11px;
+  font-weight: 500;
+  transition: fill 180ms ease;
+}
+.sitemap a:hover .dot,
+.sitemap a:focus-visible .dot {
+  fill: var(--rain);
+}
+.sitemap a:hover .site-label,
+.sitemap a:focus-visible .site-label {
+  fill: var(--paper);
+}
+.sitemap .is-on .dot {
+  fill: var(--dust);
+}
+.sitemap .is-on .site-label {
+  fill: var(--paper);
+  font-weight: 650;
+}
+.sitemap .halo {
+  fill: none;
+  stroke: var(--dust);
+  stroke-width: 1.5;
+}
+.sitemap-note {
+  margin: 0.75rem 0 0;
+  max-width: 38ch;
+}
+
+.map-split {
+  display: grid;
+  gap: clamp(1.5rem, 4vw, 3rem);
+  align-items: center;
+}
+@media (min-width: 900px) {
+  .map-split {
+    grid-template-columns: 1fr 1.1fr;
+  }
+}
+
 .pill {
   display: inline-flex;
   align-items: center;

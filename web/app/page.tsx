@@ -1,5 +1,8 @@
 import { RainRecord } from "@/components/rain-record";
+import { RainField } from "@/components/rain-field";
 import { Reveal } from "@/components/reveal";
+import { Rise, CountUp } from "@/components/on-view";
+import { SiteMap } from "@/components/site-map";
 import { SiteControls } from "@/components/site-controls";
 import {
   SITE_ORDER,
@@ -118,10 +121,21 @@ export default async function Home({
   const lastYear = past[past.length - 1]?.season;
   const driest = past.reduce((a, b) => (b.mm_x10 < a.mm_x10 ? b : a), past[0]!);
 
+  // Each site's own long-run breach rate at its own default strike, for the map.
+  const mapSites = sites().map(({ id, site: x }) => ({
+    id,
+    name: x.name,
+    lat: x.lat,
+    lon: x.lon,
+    window: windowLabel(x),
+    dryRate: historyView(id, defaultStrike(id, SEASON), SEASON).allRate,
+  }));
+
   return (
     <main>
       <Reveal>
         <section className="hero">
+          <RainField />
           <span className="pill" data-animate>
             <b>Live</b> on NEAR testnet — three policies settled
           </span>
@@ -183,22 +197,32 @@ export default async function Home({
         <div className="band-inner">
           <div className="readings cols-4" style={{ borderTop: "none", paddingTop: 0 }}>
             <div className="reading is-dry">
-              <span className="value">{h.all.k}</span>
+              <span className="value">
+                <CountUp value={h.all.k} />
+              </span>
               <span className="label">Seasons that would have paid</span>
-              <span className="note">out of {h.all.n} on record at {s.name}</span>
+              <span className="note">
+                out of {h.all.n} on record at {s.name}
+              </span>
             </div>
             <div className="reading is-wet">
-              <span className="value">{(driest.mm_x10 / 10).toFixed(1)}</span>
+              <span className="value">
+                <CountUp value={driest.mm_x10 / 10} decimals={1} />
+              </span>
               <span className="label">Driest window, in millimetres</span>
               <span className="note">{driest.season} — the worst season in the record</span>
             </div>
             <div className="reading">
-              <span className="value">5</span>
+              <span className="value">
+                <CountUp value={5} />
+              </span>
               <span className="label">Competing underwriters</span>
               <span className="note">each with its own capital and its own key</span>
             </div>
             <div className="reading">
-              <span className="value">3</span>
+              <span className="value">
+                <CountUp value={3} />
+              </span>
               <span className="label">Policies settled on testnet</span>
               <span className="note">one of them by a TEE oracle reading NASA directly</span>
             </div>
@@ -211,15 +235,49 @@ export default async function Home({
         <p className="lede">
           A sealed-bid auction, start to finish, in about two minutes on chain.
         </p>
-        <div className="steps">
+        <Rise className="steps" stagger={0.08}>
           {STEPS.map((step) => (
             <div className="step" key={step.title}>
               <h3>{step.title}</h3>
               <p>{step.body}</p>
             </div>
           ))}
-        </div>
+        </Rise>
       </section>
+
+      <div className="band band-tint">
+        <div className="band-inner">
+          <div className="map-split">
+            <Rise>
+              <SiteMap
+                sites={mapSites}
+                selectedId={siteId}
+                strike={undefined}
+                payout={payoutUsdc}
+              />
+            </Rise>
+            <Rise>
+              <h2>Eight places, eight different risks</h2>
+              <p>
+                Rainfall is local. {mapSites[0]?.name} and {mapSites[mapSites.length - 1]?.name}{" "}
+                sit in different climates on the same map, and their windows do not even
+                start in the same month — the south plants in April, the far north in June.
+                A single national price would be wrong everywhere.
+              </p>
+              <p className="muted">
+                The market prices each site on its own record, so the premium follows the
+                place rather than the country. Pick one on the map and every figure on this
+                page recomputes for it.
+              </p>
+              <div className="btn-row">
+                <a className="btn btn-ghost" href="#price">
+                  Change the terms
+                </a>
+              </div>
+            </Rise>
+          </div>
+        </div>
+      </div>
 
       <section id="price">
         <h2>Price a different risk</h2>
