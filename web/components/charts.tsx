@@ -108,7 +108,7 @@ export function RainfallHistory({
                 x2={W - padR}
                 y1={y(t)}
                 y2={y(t)}
-                stroke="var(--grid)"
+                stroke="var(--rule)"
                 strokeWidth="1"
               />
               <text
@@ -116,14 +116,14 @@ export function RainfallHistory({
                 y={y(t) + 4}
                 textAnchor="end"
                 fontSize="11"
-                fill="var(--text-muted)"
+                fill="var(--silt)"
                 style={{ fontVariantNumeric: "tabular-nums" }}
               >
                 {fmtTick(t)}
               </text>
             </g>
           ))}
-          <text x={padL - 8} y={12} textAnchor="end" fontSize="11" fill="var(--text-muted)">
+          <text x={padL - 8} y={12} textAnchor="end" fontSize="11" fill="var(--silt)">
             mm
           </text>
 
@@ -140,7 +140,7 @@ export function RainfallHistory({
                 {/* square at the baseline, 4px rounded at the data end */}
                 <path
                   d={`M${bx},${by + bh} L${bx},${by + r} Q${bx},${by} ${bx + r},${by} L${bx + barW - r},${by} Q${bx + barW},${by} ${bx + barW},${by + r} L${bx + barW},${by + bh} Z`}
-                  fill={pays ? "var(--status-critical)" : "var(--series-1)"}
+                  fill={pays ? "var(--chart-dry)" : "var(--chart-wet)"}
                   opacity={hover === null || hover === i ? 1 : 0.45}
                 />
                 {/* hit target wider than the mark */}
@@ -163,7 +163,7 @@ export function RainfallHistory({
             x2={W - padR}
             y1={strikeY}
             y2={strikeY}
-            stroke="var(--text-primary)"
+            stroke="var(--paper)"
             strokeWidth="1.5"
             strokeDasharray="5 4"
           />
@@ -172,7 +172,7 @@ export function RainfallHistory({
             y={strikeY - 6}
             textAnchor="end"
             fontSize="11.5"
-            fill="var(--text-primary)"
+            fill="var(--paper)"
             fontWeight="600"
           >
             {(strike_mm_x10 / 10).toFixed(1)} mm strike
@@ -184,7 +184,7 @@ export function RainfallHistory({
             x2={W - padR}
             y1={padT + plotH}
             y2={padT + plotH}
-            stroke="var(--axis)"
+            stroke="var(--rule-strong)"
             strokeWidth="1"
           />
 
@@ -197,7 +197,7 @@ export function RainfallHistory({
                 y={H - padB + 16}
                 textAnchor="middle"
                 fontSize="11"
-                fill="var(--text-muted)"
+                fill="var(--silt)"
                 style={{ fontVariantNumeric: "tabular-nums" }}
               >
                 {s.season}
@@ -227,11 +227,11 @@ export function RainfallHistory({
 
       <div className="legend">
         <span className="item">
-          <span className="swatch" style={{ background: "var(--status-critical)" }} />
+          <span className="swatch" style={{ background: "var(--chart-dry)" }} />
           below strike — policy pays
         </span>
         <span className="item">
-          <span className="swatch" style={{ background: "var(--series-1)" }} />
+          <span className="swatch" style={{ background: "var(--chart-wet)" }} />
           at or above strike — no payout
         </span>
       </div>
@@ -278,8 +278,7 @@ export function ClearingPrice({ points }: { points: ClearingPoint[] }) {
     <div>
       <div className="chart-title">Clearing price by season</div>
       <div className="chart-sub">
-        Mean winning premium as a share of the payout, across cleared rounds. One series, so
-        the title names it.
+        Mean winning premium as a share of the payout, across every round that cleared.
       </div>
       <div className="chart-wrap">
         <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={
@@ -287,13 +286,13 @@ export function ClearingPrice({ points }: { points: ClearingPoint[] }) {
         }>
           {ticks.map((t) => (
             <g key={t}>
-              <line x1={padL} x2={W - padR} y1={y(t)} y2={y(t)} stroke="var(--grid)" strokeWidth="1" />
+              <line x1={padL} x2={W - padR} y1={y(t)} y2={y(t)} stroke="var(--rule)" strokeWidth="1" />
               <text
                 x={padL - 8}
                 y={y(t) + 4}
                 textAnchor="end"
                 fontSize="11"
-                fill="var(--text-muted)"
+                fill="var(--silt)"
                 style={{ fontVariantNumeric: "tabular-nums" }}
               >
                 {fmtTick(t)}%
@@ -308,12 +307,12 @@ export function ClearingPrice({ points }: { points: ClearingPoint[] }) {
               x2={x(hover)}
               y1={padT}
               y2={padT + plotH}
-              stroke="var(--axis)"
+              stroke="var(--rule-strong)"
               strokeWidth="1"
             />
           ) : null}
 
-          <path d={path} fill="none" stroke="var(--series-1)" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+          <path d={path} fill="none" stroke="var(--chart-wet)" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
 
           {points.map((p, i) => (
             <circle
@@ -321,8 +320,8 @@ export function ClearingPrice({ points }: { points: ClearingPoint[] }) {
               cx={x(i)}
               cy={y(p.share * 100)}
               r="4"
-              fill="var(--series-1)"
-              stroke="var(--surface-1)"
+              fill="var(--chart-wet)"
+              stroke="var(--ink-2)"
               strokeWidth="2"
             />
           ))}
@@ -334,7 +333,7 @@ export function ClearingPrice({ points }: { points: ClearingPoint[] }) {
               y={y(last.share * 100) + 4}
               fontSize="12"
               fontWeight="600"
-              fill="var(--text-primary)"
+              fill="var(--paper)"
               style={{ fontVariantNumeric: "tabular-nums" }}
             >
               {(last.share * 100).toFixed(1)}%
@@ -346,7 +345,7 @@ export function ClearingPrice({ points }: { points: ClearingPoint[] }) {
             x2={W - padR}
             y1={padT + plotH}
             y2={padT + plotH}
-            stroke="var(--axis)"
+            stroke="var(--rule-strong)"
             strokeWidth="1"
           />
 
@@ -358,7 +357,7 @@ export function ClearingPrice({ points }: { points: ClearingPoint[] }) {
                 y={H - padB + 16}
                 textAnchor="middle"
                 fontSize="11"
-                fill="var(--text-muted)"
+                fill="var(--silt)"
                 style={{ fontVariantNumeric: "tabular-nums" }}
               >
                 {p.season}

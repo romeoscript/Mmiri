@@ -34,6 +34,16 @@
   --rain: #6fc9de;
   --dust: #e3a33c;
 
+  /* Chart marks are a separate, validated step of the same two hues. The brand accents
+     above are tuned for UI on ink; as categorical chart fills they failed the lightness
+     band in both modes and the blue fell under the chroma floor — 0.091, which reads as
+     grey rather than as a hue. These two pass all six checks against both the dark and
+     the light chart surface: lightness band, chroma floor, CVD separation (ΔE 20 protan,
+     23 tritan), the normal-vision floor (ΔE 23), and contrast. Re-run the validator
+     before changing either. */
+  --chart-wet: #2e9fc0;
+  --chart-dry: #c28519;
+
   --rule: rgba(232, 242, 241, 0.14);
   --rule-strong: rgba(232, 242, 241, 0.3);
 
@@ -515,6 +525,86 @@ td strong {
   width: 10px;
   height: 10px;
   border-radius: 2px;
+  flex: none;
+}
+
+/* ---------------- chart anatomy ----------------
+   Grid and axes stay recessive; the marks carry the chart. Text wears text tokens and
+   never the series colour, so identity always comes from the mark beside it. */
+
+.chart-wrap .grid-line {
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+.chart-wrap .axis-line {
+  stroke: var(--rule-strong);
+  stroke-width: 1;
+}
+.chart-wrap .axis-label {
+  fill: var(--silt);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.chart-wrap .axis-unit {
+  fill: var(--silt-dim);
+  font-size: 12px;
+}
+.chart-wrap .strike-line {
+  stroke: var(--paper);
+  stroke-width: 2;
+}
+.chart-wrap .strike-label {
+  fill: var(--paper);
+  font-size: 15px;
+  font-weight: 650;
+}
+.chart-wrap .point-label {
+  fill: var(--paper);
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  paint-order: stroke;
+  stroke: var(--ink-2);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+
+.tip {
+  display: grid;
+  gap: 0.1rem;
+}
+.tip b {
+  font-stretch: 112%;
+}
+.tip .paid {
+  color: var(--dust);
+}
+.tip .no-pay {
+  color: var(--silt);
+}
+
+/* The table every chart owes a reader who cannot use the picture. */
+.chart-data {
+  margin-top: 1rem;
+  border-top: 1px solid var(--rule);
+  padding-top: 0.75rem;
+}
+.chart-data summary {
+  font-size: 0.8125rem;
+  color: var(--silt);
+  cursor: pointer;
+}
+.chart-data summary:hover {
+  color: var(--paper);
+}
+.chart-data-body {
+  max-height: 20rem;
+  overflow-y: auto;
+  margin-top: 0.75rem;
+}
+.chart-data caption {
+  text-align: left;
+  padding-bottom: 0.5rem;
 }
 
 .tip {
