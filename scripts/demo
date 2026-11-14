@@ -11,6 +11,15 @@
 # Defaults to Enugu, 30 days from 15 April 2025. That window totalled 53.6 mm against a
 # 60 mm strike, so the policy pays. Pass 2026 to watch one expire instead: 113.7 mm.
 #
+# ORDERING MATTERS, and it is why this script looks the way it does. The commit window is
+# `commit_seconds` wide -- 60 by default -- and it starts the moment the round opens. A
+# single near-cli call takes the better part of ten seconds, so anything slow placed
+# between opening the round and placing the bids eats the window and every commit comes
+# back "commit window has closed". So: open, bid immediately, and only then print the
+# per-agent reasoning, which is read from the local pricing library and costs nothing on
+# chain. The waits read the contract's own deadlines rather than sleeping a fixed count,
+# so a slower network delays the script instead of breaking it.
+#
 # Needs scripts/setup and scripts/setup-agents to have been run first.
 . "$(dirname "$0")/_lib.sh"
 require_cli
@@ -22,48 +31,69 @@ STRIKE=600          # 60.0 mm
 PAYOUT=50000000     # 50 USDC
 MAX_PREMIUM=25000000 # the buyer will pay up to 25 USDC
 
+# `${2:-{\}}` looks like it defaults to an empty JSON object but passes the backslash
+# through literally, so an argument-less view dies on "Data not in JSON format!".
 view() {
-  near contract call-function as-read-only "$MARKET" "$1" json-args "${2:-{\}}" \
+  local args="${2:-}"
+  [ -z "$args" ] && args='{}'
+  near contract call-function as-read-only "$MARKET" "$1" json-args "$args" \
     network-config "$NEAR_NETWORK" now 2>/dev/null
+}
+
+# Sleeps until a contract deadline has passed, rather than for a fixed count of seconds.
+wait_past() {
+  local target="$1" label="$2" now secs
+  now=$(date +%s)
+  if [ "$target" -gt "$now" ]; then
+    secs=$(( target - now + 3 ))
+    say "waiting ${secs}s for the $label window to close (the contract enforces it)"
+    sleep "$secs"
+  else
+    say "the $label window has already closed"
+  fi
 }
 
 say "opening a round — Enugu, 30 days from 15 April $SEASON, ${STRIKE}/10 mm strike"
 TERMS="{\"lat_e4\":64500,\"lon_e4\":75100,\"start\":$START,\"days\":30,\"strike_mm_x10\":$STRIKE,\"payout\":\"$PAYOUT\"}"
 MSG=$(printf '{"RequestCover":{"terms":%s}}' "$TERMS")
 
-near contract call-function as-transaction "$USDC" ft_transfer_call \
+# Keep the output: the contract logs the new round's id, which saves a second call that
+# the commit window cannot afford.
+OPEN_OUT=$(near contract call-function as-transaction "$USDC" ft_transfer_call \
   json-args "$(printf '{"receiver_id":"%s","amount":"%s","msg":%s}' "$MARKET" "$MAX_PREMIUM" "$(printf '%s' "$MSG" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')")" \
   prepaid-gas '100 Tgas' attached-deposit '1 yoctoNEAR' \
-  sign-as "$MMIRI_PARENT" "${NET[@]}" "${SIGN[@]}"
+  sign-as "$MMIRI_PARENT" "${NET[@]}" "${SIGN[@]}" 2>&1)
 
-ROUND=$(view get_rounds '{"limit":200}' | python3 -c '
-import json,sys
-try:
-    rounds=json.loads(sys.stdin.read().strip() or "[]")
-    print(rounds[-1]["id"] if rounds else "")
-except Exception:
-    print("")
-')
+ROUND=$(printf '%s' "$OPEN_OUT" | grep -oE 'round [0-9]+ opened' | grep -oE '[0-9]+' | head -1)
 if [ -z "$ROUND" ]; then
-  echo "Could not read the new round id. Check: near contract call-function as-read-only $MARKET get_rounds json-args '{}' network-config $NEAR_NETWORK now" >&2
+  printf '%s\n' "$OPEN_OUT" >&2
+  echo "Could not read the new round id from the open call above." >&2
   exit 1
 fi
-say "round $ROUND is open"
-
-say "what each agent thinks this risk is worth"
-pnpm -s agent all quote "$ROUND" || true
+say "round $ROUND is open — bidding straight away, before the window closes"
 
 say "agents commit sealed bids"
 pnpm -s agent all bid "$ROUND"
 
-say "waiting for the commit window to close (60s)"
-sleep 65
+# Informational, and deliberately after the commits: this reads the local pricing library,
+# the same module the simulation uses, so it says what each agent just sealed.
+say "what each agent thought this risk was worth"
+pnpm -s agent all quote "$ROUND" || true
+
+DEADLINES=$(view get_round "{\"round_id\":\"$ROUND\"}" | python3 -c '
+import json,sys
+r=json.loads(sys.stdin.read().strip() or "{}")
+print(r.get("commit_deadline","0"), r.get("reveal_deadline","0"))
+')
+COMMIT_DL=${DEADLINES%% *}
+REVEAL_DL=${DEADLINES##* }
+
+wait_past "$COMMIT_DL" "commit"
 
 say "agents reveal"
 pnpm -s agent all reveal "$ROUND"
 
-say "waiting for the reveal window to close (60s)"
-sleep 65
+wait_past "$REVEAL_DL" "reveal"
 
 say "finalizing — lowest revealed premium at or under the buyer's maximum wins"
 near contract call-function as-transaction "$MARKET" finalize_round \
@@ -80,13 +110,21 @@ pnpm -s verify-oracle --lat 6.45 --lon 7.51 --start "$START" --days 30
 READING=$(pnpm -s verify-oracle --lat 6.45 --lon 7.51 --start "$START" --days 30 \
   | grep 'mm_x10 = ' | head -1 | sed 's/.*mm_x10 = \([0-9]*\).*/\1/')
 
+# Signed with the keeper's scoped function-call key, not through the CLI: setup-agents
+# deleted the keeper's full-access key by design, and `sign-with-keychain` only resolves
+# full-access keys. See scripts/keeper-submit.ts.
 say "settling with the keeper (mm_x10 = $READING)"
-near contract call-function as-transaction "$MARKET" submit_observation \
-  json-args "{\"policy_id\":\"$ROUND\",\"mm_x10\":$READING,\"days_valid\":30}" \
-  prepaid-gas '100 Tgas' attached-deposit '0 NEAR' \
-  sign-as "$KEEPER" "${NET[@]}" "${SIGN[@]}"
+pnpm -s keeper --policy "$ROUND" --mm-x10 "$READING" --days 30
 
+# submit_observation resolves through a callback, so reading the policy straight away can
+# still show "Active". Wait for the contract to finish rather than print a stale status.
 say "after settlement"
+for _ in 1 2 3 4 5 6 7 8 9 10; do
+  STATUS=$(view get_policy "{\"policy_id\":\"$ROUND\"}" \
+    | python3 -c 'import json,sys; print(json.loads(sys.stdin.read() or "{}").get("status",""))')
+  [ "$STATUS" != "Active" ] && break
+  sleep 2
+done
 view get_policy "{\"policy_id\":\"$ROUND\"}"
 
 say "the contract's books"

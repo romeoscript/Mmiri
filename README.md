@@ -190,10 +190,25 @@ cp .env.example .env     # set MMIRI_PARENT to a testnet account you control
 ./scripts/demo           # one full round, about three minutes
 ```
 
-> **These scripts have not been run.** They parse, and they are built against the CLI
-> commands as installed, but no testnet deployment exists yet and nothing here should be read
-> as "working" until a round has actually completed. Everything in steps 1–6 has been run and
-> the output above is real. See **What is not done** at the end.
+These scripts have been run, and the deployment they produced is live on NEAR testnet:
+
+| | Account |
+|---|---|
+| Market | [`market.mmiri-demo.testnet`](https://testnet.nearblocks.io/address/market.mmiri-demo.testnet) |
+| Mock USDC | [`usdc.mmiri-demo.testnet`](https://testnet.nearblocks.io/address/usdc.mmiri-demo.testnet) |
+| Keeper | [`keeper.mmiri-demo.testnet`](https://testnet.nearblocks.io/address/keeper.mmiri-demo.testnet) |
+| Underwriters | `uw-1` … `uw-5.mmiri-demo.testnet` |
+
+Two rounds have completed end to end, one of each outcome:
+
+- **Policy 7 — paid out.** Enugu, 30 days from 15 April 2025. Five agents committed sealed
+  bids, all five revealed, `uw-1` won at **9.13 USDC**, the keeper posted **53.6 mm** against
+  the 60 mm strike, and the 50 USDC payout went to the policy holder. Status `PaidOut`.
+- **Policy 8 — expired.** The same terms for 2026, which totalled **113.7 mm**. No payout, and
+  the underwriter's collateral was unlocked. Status `Expired`.
+
+Both readings reproduce from the public record with `pnpm verify-oracle`, and
+`./scripts/print-key-permissions` reads the agents' key restrictions back off the chain.
 
 ---
 
@@ -295,9 +310,14 @@ then has to honour:
   breached gets a small positive rate rather than a free policy.
 - **No change method iterates an unbounded collection.** Commits per round are capped at 32,
   because an unbounded `finalize_round` would let a griefer freeze a buyer's escrow forever.
-- **`panic = "abort"` is deliberately absent** from the release profile. near-sdk reports
-  failures through a std panic hook and `abort` bypasses hooks, so every `require!` reaches
-  the caller as a bare "unreachable opcode" with no message. Two extra KB of wasm is worth it.
+- **`panic = "abort"` is deliberately absent** from the release profile, on the reasoning that
+  near-sdk reports failures through a std panic hook that `abort` would bypass. **On testnet
+  that is not enough:** every `require!` and every `env::panic_str` in this build still
+  reaches the caller as a bare "unreachable opcode" with no message — confirmed on the
+  deployed contract, and on the USDC contract's own standard-library panics too. The contract
+  behaves correctly; it just cannot explain itself. Diagnosing a failed call therefore means
+  reading `gas_profile` to see how far execution got, or adding temporary `env::log_str`
+  breadcrumbs, because logs do survive. Worth fixing before anyone relies on the messages.
 
 ---
 
@@ -330,16 +350,15 @@ then has to honour:
   early, or pay the wrong account. It is visible on chain via the `is_demo_mode` view.
 - **The oracle trust model as actually shipped.** The contract supports two paths. The
   OutLayer path runs a sha256-pinned WASM in a TEE; the keeper path lets a trusted account
-  post the reading. **Settlement has not yet been run on either path on testnet.** The oracle
-  component is built and its logic tested, but whether OutLayer's testnet workers can reach
-  `power.larc.nasa.gov` is unverified. In keeper mode the keeper is trusted completely — it
-  could post a reading that is not true — and `scripts/verify-oracle` makes that detectable
-  after the fact, not impossible.
+  post the reading. **Settlement has run end to end on the keeper path on testnet — policies
+  7 and 8 — and has never run on the OutLayer path.** The oracle component is built and its
+  logic tested, but whether OutLayer's testnet workers can reach `power.larc.nasa.gov` is
+  still unverified. In keeper mode the keeper is trusted completely — it could post a reading
+  that is not true — and `scripts/verify-oracle` makes that detectable after the fact, not
+  impossible. The keeper's key is scoped to `submit_observation` and nothing else, so a stolen
+  keeper key can lie about rainfall but cannot move money.
 - **AI assistance.** Built with Claude Code throughout, under my direction, within the
   hackathon window. The design brief, the gate decisions and every approval are mine.
-- **My other hackathon entry.** This is one of two independent projects I have submitted. The
-  other is **Ileri** — <!-- TODO: Ileri repository URL -->. The two share no code and live in
-  separate repositories. Disclosed per the hackathon's Q-015.
 - **Libraries.** near-sdk 5.30.1, near-contract-standards 5.30.1, near-workspaces 0.24.0,
   wstd 0.6.8 (WASI HTTP), serde, near-api-js 7.5.3, Next.js 16, React 19, vitest, tsx. No
   starter template or boilerplate: the repository was empty at the start of the window and
@@ -354,14 +373,22 @@ then has to honour:
 
 Stated plainly, because a README that overpromises is worse than a small honest one.
 
-- **No testnet deployment.** `scripts/setup`, `setup-agents`, `demo` and
-  `print-key-permissions` are written but unrun. The contracts are proven in a local NEAR
-  sandbox, not on a public network.
-- **Settlement has never run end to end.** Neither the OutLayer path nor the keeper path has
-  completed against a deployed contract.
+- **The OutLayer oracle path has never run.** Settlement on testnet has only been done
+  through the keeper. The oracle component builds and its arithmetic is tested, but whether
+  OutLayer's testnet workers can reach `power.larc.nasa.gov` is still an open question, and it
+  is the one thing here that can fail for reasons outside this repository.
 - **The live Intents path is not exercised.** Quotes are real; submitting a deposit and
   polling `/v0/status` through to SUCCESS is implemented behind `ONECLICK_LIVE` and has never
   been run with real funds.
+- **Failures on chain have no messages.** See the note on `panic = "abort"` above: the
+  contract refuses invalid calls correctly but reports them as a bare wasm trap.
+- **The agents' keys cannot be rotated.** `setup-agents` deletes each agent's full-access key,
+  which is what makes the security claim true, but it also means an agent is permanently bound
+  to the market contract it was set up against and can never be re-pointed or recovered. A
+  redeployment to a new market account needs a new set of agent accounts.
+- **The commit and reveal windows are 60 seconds**, set at deployment and not changeable
+  afterwards — there is no owner-only setter. That is wide enough only because the agents bid
+  concurrently; it leaves little room on a slow network.
 - **No meta-transaction relayer**, so a buyer still needs a little NEAR for gas.
 
 ## License

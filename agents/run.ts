@@ -59,10 +59,14 @@ function keyFor(agent: string): string {
   return k;
 }
 
+let fixtureCache: Fixture | undefined;
+
+/** Parsed once. It is 22,080 daily values, and all five agents read the same copy. */
 function fixture(): Fixture {
-  return JSON.parse(
+  fixtureCache ??= JSON.parse(
     readFileSync(new URL("../sim/fixtures/rainfall.json", import.meta.url), "utf8"),
   ) as Fixture;
+  return fixtureCache;
 }
 
 function siteForTerms(t: Terms): { id: string; site: Site } | null {
@@ -87,9 +91,17 @@ function readSalts(): Salts {
   }
 }
 
-function writeSalt(key: string, salt: string, premium: bigint) {
+/**
+ * One read-modify-write for a whole batch.
+ *
+ * The agents commit concurrently, and five separate read-modify-writes would race and
+ * drop salts. A commitment whose salt was lost can never be revealed, so it forfeits the
+ * bond for nothing — which makes this the one place where a race actually costs money.
+ */
+function writeSalts(entries: { key: string; salt: string; premium: bigint }[]) {
+  if (entries.length === 0) return;
   const all = readSalts();
-  all[key] = { salt, premium: premium.toString() };
+  for (const e of entries) all[e.key] = { salt: e.salt, premium: e.premium.toString() };
   mkdirSync(new URL("../.mmiri/", import.meta.url), { recursive: true });
   writeFileSync(SALT_FILE, JSON.stringify(all, null, 1) + "\n");
 }
@@ -221,51 +233,92 @@ async function cmdQuote(agent: string, roundId: string) {
   console.log();
 }
 
-async function cmdBid(agent: string, roundId: string) {
+interface PreparedBid {
+  agent: string;
+  bidder: string;
+  premium: bigint;
+  salt: string;
+  hash: string;
+}
+
+/** Prices a round and seals a premium. Reads only — nothing is written or sent. */
+async function prepareBid(agent: string, roundId: string): Promise<PreparedBid | null> {
   const round = await view<ChainRound | null>("get_round", { round_id: roundId });
   if (!round) throw new Error(`no round ${roundId}`);
-  if (round.commits.some((c) => c.bidder === `${agent}.${PARENT}`)) {
+  const bidder = `${agent}.${PARENT}`;
+  if (round.commits.some((c) => c.bidder === bidder)) {
     console.log(`${agent}: already committed to round ${roundId}`);
-    return;
+    return null;
   }
   const q = await quoteFor(agent, round);
   if (q.premium === null) {
     console.log(`${agent}: declines round ${roundId} (${q.declined})`);
-    return;
+    return null;
   }
   if (q.premium > BigInt(round.max_premium)) {
     console.log(
       `${agent}: would bid ${fmtUsdc(q.premium)}, above the buyer's ${fmtUsdc(BigInt(round.max_premium))} — not bidding`,
     );
-    return;
+    return null;
   }
-
-  const bidder = `${agent}.${PARENT}`;
   const salt = newSalt();
-  const hash = commitHash(roundId, q.premium, salt, bidder);
-
-  // Store the salt BEFORE committing. A commitment whose salt was lost can never be
-  // revealed, which forfeits the bond for nothing.
-  writeSalt(`${roundId}:${bidder}`, salt, q.premium);
-
-  await agentAccount(agent).callFunction({
-    contractId: MARKET,
-    methodName: "commit_bid",
-    args: { round_id: roundId, hash },
-    gas: GAS,
-  });
-  console.log(`${agent}: committed to round ${roundId} (sealed ${fmtUsdc(q.premium)} USDC)`);
+  return { agent, bidder, premium: q.premium, salt, hash: commitHash(roundId, q.premium, salt, bidder) };
 }
 
-async function cmdReveal(agent: string, roundId: string) {
+/**
+ * Commit sealed bids, all agents at once.
+ *
+ * Concurrent rather than one after another, for two reasons. The commit window is
+ * `commit_seconds` wide — 60 by default — and five sequential round trips to testnet do
+ * not reliably fit inside it: the later agents get "commit window has closed" and the
+ * auction silently runs with half its bidders. And five independent underwriters racing
+ * for the same risk is what the market actually is; a queue is an artefact of the script.
+ *
+ * Every salt is on disk before any commit is sent. A commitment whose salt was lost can
+ * never be revealed and forfeits the bond, so that write is not allowed to depend on a
+ * transaction that may still fail.
+ */
+async function cmdBid(agents: string[], roundId: string) {
+  const prepared = (await Promise.all(agents.map((a) => prepareBid(a, roundId))))
+    .filter((b): b is PreparedBid => b !== null);
+
+  writeSalts(prepared.map((b) => ({ key: `${roundId}:${b.bidder}`, salt: b.salt, premium: b.premium })));
+
+  const sent = await Promise.allSettled(
+    prepared.map(async (b) => {
+      await agentAccount(b.agent).callFunction({
+        contractId: MARKET,
+        methodName: "commit_bid",
+        args: { round_id: roundId, hash: b.hash },
+        gas: GAS,
+      });
+      console.log(`${b.agent}: committed to round ${roundId} (sealed ${fmtUsdc(b.premium)} USDC)`);
+    }),
+  );
+
+  // One agent's failure is not the auction's: report it and let the rest stand.
+  let failures = 0;
+  sent.forEach((r, i) => {
+    if (r.status === "rejected") {
+      failures += 1;
+      const agent = prepared[i]?.agent ?? "unknown";
+      console.error(
+        `${agent}: commit failed — ${r.reason instanceof Error ? r.reason.message : String(r.reason)}`,
+      );
+    }
+  });
+  if (prepared.length > 0 && failures === prepared.length) {
+    throw new Error(`every commit on round ${roundId} failed`);
+  }
+}
+
+async function revealOne(agent: string, roundId: string, round: ChainRound) {
   const bidder = `${agent}.${PARENT}`;
   const stored = readSalts()[`${roundId}:${bidder}`];
   if (!stored) {
     console.log(`${agent}: no stored salt for round ${roundId} — nothing to reveal`);
     return;
   }
-  const round = await view<ChainRound | null>("get_round", { round_id: roundId });
-  if (!round) throw new Error(`no round ${roundId}`);
   const mine = round.commits.find((c) => c.bidder === bidder);
   if (!mine) {
     console.log(`${agent}: no commit on round ${roundId}`);
@@ -285,6 +338,24 @@ async function cmdReveal(agent: string, roundId: string) {
   console.log(`${agent}: revealed ${fmtUsdc(BigInt(stored.premium))} USDC on round ${roundId}`);
 }
 
+/**
+ * Reveal, all agents at once. Concurrent for the same reason as committing: the reveal
+ * window is as narrow as the commit window, and an unrevealed bid forfeits its bond.
+ */
+async function cmdReveal(agents: string[], roundId: string) {
+  const round = await view<ChainRound | null>("get_round", { round_id: roundId });
+  if (!round) throw new Error(`no round ${roundId}`);
+
+  const sent = await Promise.allSettled(agents.map((a) => revealOne(a, roundId, round)));
+  sent.forEach((r, i) => {
+    if (r.status === "rejected") {
+      console.error(
+        `${agents[i] ?? "unknown"}: reveal failed — ${r.reason instanceof Error ? r.reason.message : String(r.reason)}`,
+      );
+    }
+  });
+}
+
 /** Acts on every open round: commits while it can, reveals once the window opens. */
 async function cmdWatch(agents: string[], once: boolean) {
   for (;;) {
@@ -296,13 +367,11 @@ async function cmdWatch(agents: string[], once: boolean) {
       const commitOpen = now < Number(r.commit_deadline);
       const revealOpen = now >= Number(r.commit_deadline) && now < Number(r.reveal_deadline);
 
-      for (const a of agents) {
-        try {
-          if (commitOpen) await cmdBid(a, r.id);
-          else if (revealOpen) await cmdReveal(a, r.id);
-        } catch (e) {
-          console.error(`${a}: ${e instanceof Error ? e.message : String(e)}`);
-        }
+      try {
+        if (commitOpen) await cmdBid(agents, r.id);
+        else if (revealOpen) await cmdReveal(agents, r.id);
+      } catch (e) {
+        console.error(`round ${r.id}: ${e instanceof Error ? e.message : String(e)}`);
       }
     }
     if (once) return;
@@ -343,11 +412,11 @@ async function main() {
       break;
     case "bid":
       if (!arg) usage();
-      for (const a of agents) await cmdBid(a, arg);
+      await cmdBid(agents, arg);
       break;
     case "reveal":
       if (!arg) usage();
-      for (const a of agents) await cmdReveal(a, arg);
+      await cmdReveal(agents, arg);
       break;
     case "watch":
       await cmdWatch(agents, process.argv.includes("--once"));

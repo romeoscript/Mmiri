@@ -55,7 +55,10 @@ require_cli() {
 # Creates a sub-account only if it does not already exist, so the scripts can be re-run.
 ensure_account() {
   local id="$1" balance="$2"
-  if near account view-account-summary "$id" "${NET[@]}" >/dev/null 2>&1; then
+  # `now` is the block reference, and it is required: without it near-cli-rs cannot
+  # complete the command non-interactively, exits non-zero, and every account reads as
+  # absent -- which made the create below run against accounts that already existed.
+  if near account view-account-summary "$id" "${NET[@]}" now >/dev/null 2>&1; then
     echo "    $id already exists"
     return 0
   fi

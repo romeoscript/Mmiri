@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit",
     "fixture": "node scripts/build-fixture.mjs",
     "verify-oracle": "tsx scripts/verify-oracle.ts",
+    "keeper": "tsx scripts/keeper-submit.ts",
     "agent": "tsx agents/run.ts"
   },
   "devDependencies": {
