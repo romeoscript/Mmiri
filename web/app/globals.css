@@ -660,6 +660,16 @@ button.cta-sm {
   color: var(--paper);
   cursor: pointer;
 }
+/* Connecting is the main thing a visitor can do in the masthead, so it looks like it. */
+button.cta-sm.is-action {
+  background: var(--rain);
+  border-color: var(--rain);
+  color: #04141a;
+}
+button.cta-sm.is-action:hover {
+  background: color-mix(in srgb, var(--rain) 86%, white);
+  border-color: color-mix(in srgb, var(--rain) 86%, white);
+}
 .cta-sm.is-idle {
   opacity: 0.45;
   cursor: default;
@@ -699,12 +709,53 @@ button.cta-sm {
 
 /* ---------------- buy flow ---------------- */
 
+/* Configure on the left, price and buy on the right — the shape people already know
+   from every checkout. The card follows you down the column while you change terms, so
+   the price and the button are never scrolled off while you are deciding. */
+.buy-split {
+  display: grid;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  align-items: start;
+}
+@media (min-width: 1020px) {
+  .buy-split {
+    grid-template-columns: minmax(0, 1fr) 24rem;
+  }
+  .buy-rail {
+    position: sticky;
+    top: 5.25rem;
+  }
+}
+.buy-config {
+  min-width: 0;
+}
+
 .buy {
-  border: 1px solid var(--rule-strong);
-  border-radius: 8px;
-  background: var(--ink-2);
-  padding: clamp(1.1rem, 2.5vw, 1.75rem);
-  margin-top: 1.5rem;
+  border: 1px solid color-mix(in srgb, var(--rain) 34%, var(--rule-strong));
+  border-radius: 10px;
+  background:
+    radial-gradient(
+      120% 80% at 50% 0%,
+      color-mix(in srgb, var(--rain) 11%, transparent) 0%,
+      transparent 60%
+    ),
+    var(--ink-2);
+  padding: clamp(1.1rem, 2.5vw, 1.6rem);
+  box-shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.9);
+  position: relative;
+  overflow: hidden;
+}
+/* The thing being insured, falling behind the thing that insures it. `.buy` paints a
+   background, so the canvas cannot sit at a negative z-index here or the background
+   would cover it; it goes to 0 and the content is lifted above it instead. */
+.buy .rain-field {
+  z-index: 0;
+  mask-image: linear-gradient(to bottom, black 0%, transparent 72%);
+  opacity: 0.8;
+}
+.buy > *:not(.rain-field) {
+  position: relative;
+  z-index: 1;
 }
 .buy-summary {
   display: flex;

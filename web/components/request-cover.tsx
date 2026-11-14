@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useWallet } from "@/components/wallet";
+import { RainField } from "@/components/rain-field";
 
 const USDC_ID = process.env.NEXT_PUBLIC_USDC_ID ?? "";
 const MARKET_ID = process.env.NEXT_PUBLIC_MARKET_ID ?? "";
@@ -184,6 +185,7 @@ export function RequestCover({
 
   return (
     <div className="buy">
+      <RainField />
       <div className="buy-summary">
         <div>
           <h3>Request this cover</h3>

@@ -1,7 +1,7 @@
 import { RainRecord } from "@/components/rain-record";
 import { RainField } from "@/components/rain-field";
 import { Reveal } from "@/components/reveal";
-import { Rise, CountUp } from "@/components/on-view";
+import { Choreography, CountUp } from "@/components/on-view";
 import { SiteMap } from "@/components/site-map";
 import { SiteControls } from "@/components/site-controls";
 import { RequestCover } from "@/components/request-cover";
@@ -136,6 +136,7 @@ export default async function Home({
 
   return (
     <main>
+      <Choreography />
       <Reveal>
         <section className="hero">
           <RainField />
@@ -151,7 +152,7 @@ export default async function Home({
           </p>
           <div className="btn-row" data-animate>
             <a className="btn btn-primary" href="#price">
-              Price a risk
+              Get cover
             </a>
             <a className="btn btn-ghost" href="/simulation">
               See 15 seasons backtested
@@ -195,7 +196,7 @@ export default async function Home({
 
       <div className="band band-tint">
         <div className="band-inner">
-          <dl className="ledger">
+          <dl className="ledger" data-reveal="deal">
             <div className="ledger-row is-dry">
               <dt>
                 Seasons that would have paid
@@ -239,33 +240,33 @@ export default async function Home({
       </div>
 
       <section>
-        <h2>How one round works</h2>
+        <h2 data-reveal="clip">How one round works</h2>
         <p className="lede">
           A sealed-bid auction, start to finish, in about two minutes on chain.
         </p>
-        <Rise className="steps" stagger={0.08}>
+        <div className="steps" data-reveal="deal">
           {STEPS.map((step) => (
             <div className="step" key={step.title}>
               <h3>{step.title}</h3>
               <p>{step.body}</p>
             </div>
           ))}
-        </Rise>
+        </div>
       </section>
 
       <div className="band band-tint">
         <div className="band-inner">
           <div className="map-split">
-            <Rise>
+            <div data-reveal="settle">
               <SiteMap
                 sites={mapSites}
                 selectedId={siteId}
                 strike={undefined}
                 payout={payoutUsdc}
               />
-            </Rise>
-            <Rise>
-              <h2>Eight places, eight different risks</h2>
+            </div>
+            <div>
+              <h2 data-reveal="clip">Eight places, eight different risks</h2>
               <p>
                 Rainfall is local. {mapSites[0]?.name} and {mapSites[mapSites.length - 1]?.name}{" "}
                 sit in different climates on the same map, and their windows do not even
@@ -282,18 +283,20 @@ export default async function Home({
                   Change the terms
                 </a>
               </div>
-            </Rise>
+            </div>
           </div>
         </div>
       </div>
 
       <section id="price">
-        <h2>Price a different risk</h2>
+        <h2 data-reveal="clip">Set your terms, then buy the cover</h2>
         <p className="lede">
-          Every number below recomputes from the committed rainfall record when you change
-          these.
+          Change anything on the left and every figure recomputes from the committed
+          rainfall record. The price on the right is what the market would charge you now.
         </p>
 
+        <div className="buy-split">
+        <div className="buy-config">
         <SiteControls
           sites={sites().map(({ id, site: x }) => ({
             id,
@@ -358,6 +361,9 @@ export default async function Home({
           </div>
         </div>
 
+        </div>
+
+        <aside className="buy-rail">
         <RequestCover
           terms={{
             lat_e4: s.lat_e4,
@@ -374,6 +380,8 @@ export default async function Home({
           windowLabel={`${windowLabel(s)} ${SEASON}`}
           expectedPremium={best ? fmtUsdc(best.q.premium!) : null}
         />
+        </aside>
+        </div>
 
         {best && dearest ? (
           <div className="notice info">
@@ -392,7 +400,7 @@ export default async function Home({
       </section>
 
       <section>
-        <h2>Why this needs a market and not a formula</h2>
+        <h2 data-reveal="clip">Why this needs a market and not a formula</h2>
         <div className="readings cols-3">
           <div className="reading is-wet">
             <span className="value">{(h.allRate * 100).toFixed(1)}%</span>
@@ -429,12 +437,12 @@ export default async function Home({
 
       <div className="band">
         <div className="band-inner">
-          <h2>Settled on testnet, not described</h2>
+          <h2 data-reveal="clip">Settled on testnet, not described</h2>
           <p className="lede">
             Every one of these is a transaction you can open and a reading you can recompute
             yourself with <span className="mono">pnpm verify-oracle</span>.
           </p>
-          <div className="grid cols-3">
+          <div className="grid cols-3" data-reveal="deal">
             {SETTLED.map((p) => (
               <div className="panel" key={p.id}>
                 <div className="panel-head">
