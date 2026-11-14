@@ -46,8 +46,13 @@
   --rhythm: clamp(3rem, 7vw, 5.5rem);
 }
 
+/* The theme hook is namespaced on purpose. `data-theme` is a common enough name that
+   browser extensions set it on <html> for their own injected UI — one here was flipping
+   the page to the light palette about 600ms after every load, because this stylesheet
+   read that as the visitor explicitly choosing light and let it beat the OS setting.
+   Nothing outside this app writes `data-mmiri-theme`. */
 @media (prefers-color-scheme: light) {
-  :root:where(:not([data-theme="dark"])) {
+  :root:where(:not([data-mmiri-theme="dark"])) {
     color-scheme: light;
     --ink: #f4f8f7;
     --ink-2: #ffffff;
@@ -64,7 +69,7 @@
   }
 }
 
-:root[data-theme="light"] {
+:root[data-mmiri-theme="light"] {
   color-scheme: light;
   --ink: #f4f8f7;
   --ink-2: #ffffff;
