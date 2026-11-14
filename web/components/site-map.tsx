@@ -101,6 +101,19 @@ export function SiteMap({
 
   const selected = sites.find((s) => s.id === selectedId);
 
+  // Nsukka and Enugu are 45km apart, which at this scale puts their labels on top of one
+  // another. Anything with a close neighbour drops its label below the marker if it is
+  // the southern of the pair, so both stay readable without hand-placing every site.
+  const labelDy = new Map<string, number>();
+  for (const a of sites) {
+    const near = sites.find(
+      (b) =>
+        b.id !== a.id &&
+        Math.hypot(px(a.lon) - px(b.lon), py(a.lat) - py(b.lat)) < 30,
+    );
+    labelDy.set(a.id, near && a.lat < near.lat ? 22 : -13);
+  }
+
   return (
     <div className="sitemap">
       <svg
@@ -139,7 +152,12 @@ export function SiteMap({
               <g data-marker className={on ? "marker is-on" : "marker"}>
                 {on ? <circle data-halo cx={x} cy={y} r="9" className="halo" /> : null}
                 <circle cx={x} cy={y} r={on ? 6 : 4} className="dot" />
-                <text x={x} y={y - 12} textAnchor="middle" className="site-label">
+                <text
+                  x={x}
+                  y={y + (labelDy.get(s.id) ?? -13)}
+                  textAnchor="middle"
+                  className="site-label"
+                >
                   {s.name}
                 </text>
                 <title>

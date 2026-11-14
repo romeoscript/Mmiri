@@ -136,9 +136,6 @@ export default async function Home({
       <Reveal>
         <section className="hero">
           <RainField />
-          <span className="pill" data-animate>
-            <b>Live</b> on NEAR testnet — three policies settled
-          </span>
           <h1 className="display" data-animate>
             Rainfall cover,
             <br />
@@ -195,38 +192,46 @@ export default async function Home({
 
       <div className="band band-tint">
         <div className="band-inner">
-          <div className="readings cols-4" style={{ borderTop: "none", paddingTop: 0 }}>
-            <div className="reading is-dry">
-              <span className="value">
+          <dl className="ledger">
+            <div className="ledger-row is-dry">
+              <dt>
+                Seasons that would have paid
+                <small>{s.name}, every season on record since {firstYear}</small>
+              </dt>
+              <dd>
                 <CountUp value={h.all.k} />
-              </span>
-              <span className="label">Seasons that would have paid</span>
-              <span className="note">
-                out of {h.all.n} on record at {s.name}
-              </span>
+                <span>of {h.all.n}</span>
+              </dd>
             </div>
-            <div className="reading is-wet">
-              <span className="value">
+            <div className="ledger-row is-wet">
+              <dt>
+                Driest window in the record
+                <small>{driest.season} — against a {mm(strike)} strike</small>
+              </dt>
+              <dd>
                 <CountUp value={driest.mm_x10 / 10} decimals={1} />
-              </span>
-              <span className="label">Driest window, in millimetres</span>
-              <span className="note">{driest.season} — the worst season in the record</span>
+                <span>mm</span>
+              </dd>
             </div>
-            <div className="reading">
-              <span className="value">
+            <div className="ledger-row">
+              <dt>
+                Underwriters competing for the risk
+                <small>each with its own capital, its own key, and its own read</small>
+              </dt>
+              <dd>
                 <CountUp value={5} />
-              </span>
-              <span className="label">Competing underwriters</span>
-              <span className="note">each with its own capital and its own key</span>
+              </dd>
             </div>
-            <div className="reading">
-              <span className="value">
+            <div className="ledger-row">
+              <dt>
+                Policies settled on testnet
+                <small>one of them by a TEE oracle reading NASA directly</small>
+              </dt>
+              <dd>
                 <CountUp value={3} />
-              </span>
-              <span className="label">Policies settled on testnet</span>
-              <span className="note">one of them by a TEE oracle reading NASA directly</span>
+              </dd>
             </div>
-          </div>
+          </dl>
         </div>
       </div>
 

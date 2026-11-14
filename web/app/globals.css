@@ -25,8 +25,10 @@
   --ink-2: #0e2a32;
   --ink-3: #14393f;
   --paper: #e8f2f1;
-  --silt: #7d9aa1;
-  --silt-dim: #5c767d;
+  --silt: #94afb6;
+  /* 3.71:1 on the ink and 3.11:1 on a raised surface is not body text. Both tints are
+     measured against both grounds rather than eyeballed. */
+  --silt-dim: #7d9aa1;
 
   /* The two states. Nothing else may use these. */
   --rain: #6fc9de;
@@ -41,9 +43,41 @@
   --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
   --sans: var(--font-archivo), system-ui, -apple-system, sans-serif;
 
-  --measure: 66ch;
+  --measure: 68ch;
   --gutter: clamp(1rem, 4vw, 2.5rem);
-  --rhythm: clamp(3rem, 7vw, 5.5rem);
+  /* Was running to 5.5rem, which left the wide viewport mostly empty between blocks. */
+  --rhythm: clamp(2.5rem, 5vw, 4rem);
+}
+
+/* The surfaces nobody draws still belong to the design. Left at browser defaults these
+   are the giveaway that a page was assembled rather than built. */
+::selection {
+  background: color-mix(in srgb, var(--rain) 35%, transparent);
+  color: var(--paper);
+}
+:root {
+  scrollbar-color: var(--ink-3) transparent;
+  scrollbar-width: thin;
+}
+input,
+textarea,
+select {
+  caret-color: var(--rain);
+}
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--ink-3);
+  border-radius: 999px;
+  border: 3px solid var(--ink);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--silt-dim);
 }
 
 /* The theme hook is namespaced on purpose. `data-theme` is a common enough name that
@@ -611,7 +645,6 @@ button.secondary {
   height: 7px;
   border-radius: 50%;
   background: var(--good);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--good) 22%, transparent);
 }
 .cta-sm:hover {
   border-color: var(--paper);
@@ -667,9 +700,69 @@ button.secondary {
   width: 100vw;
   margin-left: 50%;
   transform: translateX(-50%);
-  padding: clamp(2.5rem, 6vw, 4.5rem) var(--gutter);
+  padding: clamp(2.25rem, 4.5vw, 3.5rem) var(--gutter);
   border-top: 1px solid var(--rule);
   border-bottom: 1px solid var(--rule);
+}
+
+/* ---------------- ledger ----------------
+   This is an insurance book, so the headline figures are set as a statement: the thing
+   named on the left, the figure on the right, a rule between each. It replaces a row of
+   big numbers over small captions, which is the stock metric strip and leaves most of a
+   wide viewport empty. */
+
+.ledger {
+  display: grid;
+  gap: 0;
+  max-width: 62rem;
+}
+.ledger-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 1.5rem;
+  padding: 0.95rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+.ledger-row:first-child {
+  border-top: 1px solid var(--rule-strong);
+}
+.ledger-row dt {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--paper);
+  font-weight: 500;
+}
+.ledger-row dt small {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--silt);
+  font-weight: 400;
+  margin-top: 0.1rem;
+}
+.ledger-row dd {
+  margin: 0;
+  font-stretch: 125%;
+  font-weight: 700;
+  font-size: clamp(1.5rem, 2.6vw, 2.125rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.ledger-row dd span {
+  font-stretch: 100%;
+  font-weight: 500;
+  font-size: 0.9375rem;
+  color: var(--silt);
+  letter-spacing: 0;
+  margin-left: 0.4rem;
+}
+.ledger-row.is-dry dd {
+  color: var(--dust);
+}
+.ledger-row.is-wet dd {
+  color: var(--rain);
 }
 .band-tint {
   background: var(--ink-2);
@@ -732,23 +825,28 @@ button.secondary {
   font-size: 9px;
 }
 .sitemap .outline {
-  fill: color-mix(in srgb, var(--rain) 7%, transparent);
-  stroke: var(--rule-strong);
-  stroke-width: 1.5;
+  fill: color-mix(in srgb, var(--rain) 14%, transparent);
+  stroke: var(--rain);
+  stroke-width: 2;
   stroke-linejoin: round;
+  stroke-opacity: 0.85;
 }
 .sitemap a {
   text-decoration: none;
 }
 .sitemap .dot {
-  fill: var(--silt);
+  fill: var(--paper);
   transition: fill 180ms ease, r 180ms ease;
 }
 .sitemap .site-label {
-  fill: var(--silt);
-  font-size: 11px;
+  fill: var(--silt-dim);
+  font-size: 12px;
   font-weight: 500;
   transition: fill 180ms ease;
+  paint-order: stroke;
+  stroke: var(--ink-2);
+  stroke-width: 3px;
+  stroke-linejoin: round;
 }
 .sitemap a:hover .dot,
 .sitemap a:focus-visible .dot {
