@@ -1,0 +1,45 @@
+=== X / Twitter (attach brag.mp4) ===
+
+Smallholder farmers can't buy drought cover, because assessing a two-hectare farm costs
+more than the policy is worth.
+
+Mmiri removes the assessor. Five underwriter agents bid sealed premiums for the risk, the
+lowest wins and locks the full payout as collateral, and NASA's rainfall record settles it.
+Nobody files a claim.
+
+Backtested on 15 seasons of Nigerian rainfall: the agent that priced on all 45 years won
+80% of the market and lost most of its capital. The one that trusted recent seasons made
+money. Nobody told these agents the climate is drying — the rainfall did.
+
+Built at NEAR HACKATHON. @NEARProtocol #NEARHackathon
+
+Repo: https://github.com/romeoscript/Mmiri
+
+
+=== Short version (if the above runs long) ===
+
+Assessing a two-hectare farm costs more than the drought policy is worth. So we removed the
+assessor: five agents bid sealed premiums for the risk, and NASA's rainfall record settles
+it. No claim form.
+
+In our 15-season backtest the agent that ignored the drying climate lost its shirt.
+
+Built at NEAR HACKATHON. @NEARProtocol #NEARHackathon
+
+
+=== One-liner (Discord / LinkedIn preamble) ===
+
+A sealed-bid market where five agents compete to price rainfall risk for smallholder
+farmers — settled from NASA's record, with the policy as an NFT that carries the payout.
+
+
+=== Notes before posting ===
+
+- Attach brag-output/brag.mp4 (1920x1080, 24s, H.264 + AAC).
+- @NearLegion and @NearBuilders are optional per the rules; @NEARProtocol and
+  #NEARHackathon are required, as is the phrase "Built at NEAR HACKATHON".
+- Every figure in the video is real: the 45 season totals come from the committed fixture
+  via the contract's own integer algorithm, the five premiums are what agents/pricing
+  returns, and 53.6 mm is the reading that settled policy 7 on testnet.
+- This is the share clip, not the hackathon demo video. docs/DEMO.md still holds the
+  100-second walkthrough script for the submission itself.

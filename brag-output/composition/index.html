@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="en" data-resolution="landscape">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "Archivo";
+        font-style: normal;
+        font-weight: 700;
+        font-stretch: 125%;
+        src: url("assets/fonts/archivo-exp-700.woff2") format("woff2");
+      }
+      @font-face {
+        font-family: "Archivo";
+        font-style: normal;
+        font-weight: 500;
+        font-stretch: 100%;
+        src: url("assets/fonts/archivo-500.woff2") format("woff2");
+      }
+
+      :root {
+        --ink: #08191f;
+        --ink-2: #0e2a32;
+        --paper: #e8f2f1;
+        --silt: #94afb6;
+        --rain: #6fc9de;
+        --dust: #e3a33c;
+        --chart-wet: #2e9fc0;
+        --chart-dry: #c28519;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--ink);
+      }
+      #root {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        background: var(--ink);
+        font-family: "Archivo", sans-serif;
+        color: var(--paper);
+      }
+
+      .scene {
+        position: absolute;
+        inset: 0;
+      }
+
+      .display {
+        font-weight: 700;
+        font-stretch: 125%;
+        letter-spacing: -0.02em;
+        line-height: 1.04;
+      }
+      .body {
+        font-weight: 500;
+        font-stretch: 100%;
+        letter-spacing: 0;
+      }
+
+      /* ---- scene 1: the failed season ---- */
+      .photo-wrap {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+      }
+      .photo-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .scrim {
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(
+            to right,
+            var(--ink) 2%,
+            rgba(8, 25, 31, 0.86) 42%,
+            rgba(8, 25, 31, 0.25) 100%
+          ),
+          linear-gradient(to top, var(--ink) 1%, rgba(8, 25, 31, 0) 46%);
+      }
+      #s1-line1 {
+        position: absolute;
+        left: 150px;
+        bottom: 330px;
+        width: 1180px;
+        font-size: 86px;
+      }
+      #s1-line2 {
+        position: absolute;
+        left: 150px;
+        bottom: 236px;
+        font-size: 44px;
+        color: var(--dust);
+      }
+
+      /* ---- scene 2: the record ---- */
+      #s2-head {
+        position: absolute;
+        left: 150px;
+        top: 112px;
+        font-size: 60px;
+      }
+      #s2-sub {
+        position: absolute;
+        left: 150px;
+        top: 196px;
+        font-size: 30px;
+        color: var(--silt);
+      }
+      #s2-chart {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 1920px;
+        height: 1080px;
+      }
+      #s2-foot {
+        position: absolute;
+        left: 150px;
+        bottom: 96px;
+        font-size: 42px;
+        width: 1420px;
+      }
+      #s2-foot b {
+        font-weight: 700;
+        font-stretch: 125%;
+      }
+
+      /* ---- scene 3: the auction ---- */
+      #s3-head {
+        position: absolute;
+        left: 150px;
+        top: 130px;
+        font-size: 60px;
+      }
+      #s3-sub {
+        position: absolute;
+        left: 150px;
+        top: 214px;
+        font-size: 28px;
+        color: var(--silt);
+      }
+      .bid {
+        position: absolute;
+        left: 150px;
+        width: 1620px;
+        height: 96px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid rgba(232, 242, 241, 0.16);
+        padding: 0 8px 0 0;
+      }
+      .bid .who {
+        font-size: 40px;
+        font-weight: 500;
+        font-stretch: 100%;
+      }
+      .bid .amt {
+        font-size: 46px;
+        font-weight: 700;
+        font-stretch: 125%;
+        font-variant-numeric: tabular-nums;
+      }
+      .bid .amt span {
+        font-size: 28px;
+        font-weight: 500;
+        font-stretch: 100%;
+        color: var(--silt);
+        margin-left: 10px;
+      }
+      #bid-0 .amt {
+        color: var(--rain);
+      }
+      #s3-win {
+        position: absolute;
+        left: 150px;
+        bottom: 104px;
+        font-size: 34px;
+        color: var(--rain);
+      }
+
+      /* ---- scene 4: settlement ---- */
+      #s4-reading {
+        position: absolute;
+        left: 150px;
+        top: 300px;
+        font-size: 200px;
+        color: var(--dust);
+        line-height: 0.95;
+      }
+      #s4-against {
+        position: absolute;
+        left: 158px;
+        top: 530px;
+        font-size: 36px;
+        color: var(--silt);
+      }
+      #s4-paid {
+        position: absolute;
+        left: 150px;
+        top: 630px;
+        font-size: 120px;
+        letter-spacing: 0.04em;
+        color: var(--dust);
+      }
+      #s4-receipt {
+        position: absolute;
+        left: 156px;
+        top: 790px;
+        font-size: 34px;
+        color: var(--paper);
+      }
+
+      /* ---- closing frame ---- */
+      #s5-mark {
+        position: absolute;
+        left: 150px;
+        bottom: 334px;
+      }
+      #s5-line {
+        position: absolute;
+        left: 150px;
+        bottom: 228px;
+        font-size: 72px;
+      }
+      #s5-sub {
+        position: absolute;
+        left: 154px;
+        bottom: 168px;
+        font-size: 30px;
+        color: var(--silt);
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="24"
+      data-width="1920"
+      data-height="1080"
+    >
+      <!-- Scene 1 — the failed season -->
+      <div class="scene clip" id="s1" data-start="0" data-duration="5" data-track-index="0">
+        <div class="photo-wrap" data-layout-allow-overflow><img id="s1-img" src="assets/img/dry.webp" alt="" /></div>
+        <div class="scrim"></div>
+        <h1 class="display" id="s1-line1">Nobody told the underwriters the climate is drying.</h1>
+        <p class="display" id="s1-line2">The rainfall did.</p>
+      </div>
+
+      <!-- Scene 2 — forty-five seasons -->
+      <div class="scene clip" id="s2" data-start="5" data-duration="6.6" data-track-index="1">
+        <h2 class="display" id="s2-head">Forty-five seasons of rain over Enugu</h2>
+        <p class="body" id="s2-sub">Window total, 30 days from 15 April, against a 71.1 mm strike</p>
+        <svg id="s2-chart" viewBox="0 0 1920 1080" aria-hidden="true"></svg>
+        <p class="body" id="s2-foot">
+          <b>9 of 45 seasons</b> would have paid. <b>6</b> since 2011.
+        </p>
+      </div>
+
+      <!-- Scene 3 — five sealed bids -->
+      <div class="scene clip" id="s3" data-start="11.6" data-duration="6.8" data-track-index="2">
+        <h2 class="display" id="s3-head">Five agents bid blind for the risk</h2>
+        <p class="body" id="s3-sub">Sealed premiums for 50 USDC of cover</p>
+      </div>
+
+      <!-- Scene 4 — settlement -->
+      <div class="scene clip" id="s4" data-start="18.4" data-duration="2.8" data-track-index="3">
+        <p class="display" id="s4-reading">53.6 mm</p>
+        <p class="body" id="s4-against">measured against a 71.1 mm strike</p>
+        <p class="display" id="s4-paid">PAID</p>
+              </div>
+
+      <!-- Scene 5 — closing frame -->
+      <div class="scene clip" id="s5" data-start="21.2" data-duration="2.8" data-track-index="4">
+        <div class="photo-wrap" data-layout-allow-overflow><img id="s5-img" src="assets/img/wet.webp" alt="" /></div>
+        <div class="scrim"></div>
+        <svg id="s5-mark" width="92" height="92" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <defs>
+            <clipPath id="s5-drop">
+              <path d="M16 2.5c0 0 10.5 11.2 10.5 17.1A10.5 10.5 0 0 1 5.5 19.6C5.5 13.7 16 2.5 16 2.5z" />
+            </clipPath>
+          </defs>
+          <g clip-path="url(#s5-drop)">
+            <rect x="0" y="12" width="32" height="20" fill="#6fc9de" />
+            <rect x="0" y="21" width="32" height="11" fill="#e3a33c" />
+          </g>
+          <path
+            d="M16 2.5c0 0 10.5 11.2 10.5 17.1A10.5 10.5 0 0 1 5.5 19.6C5.5 13.7 16 2.5 16 2.5z"
+            stroke="#e8f2f1"
+            stroke-width="2"
+            stroke-linejoin="round"
+          />
+          <path d="M3 21h26" stroke="#e8f2f1" stroke-width="2" stroke-linecap="round" />
+        </svg>
+        <h2 class="display" id="s5-line">Rainfall cover, priced by a market</h2>
+        <p class="body" id="s5-sub">Built at NEAR HACKATHON</p>
+      </div>
+
+      <audio
+        id="score"
+        src="assets/music/score.mp3"
+        data-start="0"
+        data-duration="24"
+        data-track-index="5"
+        data-volume="0.78"
+      ></audio>
+    </div>
+
+    <script>
+      // ---------------------------------------------------------------------
+      // The record. Real figures, computed from sim/fixtures/rainfall.json with
+      // the contract's own integer algorithm (oracle/src/lib.rs::window_total):
+      // each day to hundredths, summed, rounded once to tenths. Units are
+      // tenths of a millimetre, the same mm_x10 the oracle returns.
+      // ---------------------------------------------------------------------
+      const SEASONS = [
+        [1981,2479],[1982,1982],[1983,2439],[1984,1988],[1985,1153],[1986,1773],[1987,501],[1988,1183],[1989,1956],
+        [1990,2085],[1991,1181],[1992,1494],[1993,1787],[1994,1340],[1995,1915],[1996,1521],[1997,2242],[1998,1845],
+        [1999,468],[2000,417],[2001,1704],[2002,3890],[2003,1800],[2004,2289],[2005,831],[2006,935],[2007,1740],
+        [2008,1104],[2009,1759],[2010,1597],[2011,1055],[2012,1193],[2013,948],[2014,1622],[2015,711],[2016,630],
+        [2017,1381],[2018,542],[2019,323],[2020,775],[2021,704],[2022,879],[2023,344],[2024,849],[2025,536],
+      ];
+      const STRIKE = 711;
+
+      // What agents/pricing returns for these terms: 50 USDC payout, 71.1 mm
+      // strike, 30 days from 15 April 2026 at Enugu.
+      const BIDS = [
+        ["uw-1 Longrun", "12.77"],
+        ["uw-5 Capacity", "18.74"],
+        ["uw-3 Blend", "19.52"],
+        ["uw-2 Recent", "24.71"],
+        ["uw-4 Cautious", "27.79"],
+      ];
+
+      const SVG_NS = "http://www.w3.org/2000/svg";
+
+      // ---- build the chart (deterministic, before the timeline is registered)
+      (function buildChart() {
+        const svg = document.getElementById("s2-chart");
+        const L = 180, R = 1770, BASE = 772, TOP = 300;
+        const TOPV = 4000; // tenths of a mm, so 400 mm full scale
+        const plotW = R - L;
+        const plotH = BASE - TOP;
+        const band = plotW / SEASONS.length;
+        const barW = band - 4;
+        const yOf = (v) => BASE - (v / TOPV) * plotH;
+
+        const add = (name, attrs, parent) => {
+          const el = document.createElementNS(SVG_NS, name);
+          for (const k in attrs) el.setAttribute(k, attrs[k]);
+          (parent || svg).appendChild(el);
+          return el;
+        };
+
+        // grid
+        [0, 1000, 2000, 3000, 4000].forEach((v) => {
+          add("line", {
+            x1: L, x2: R, y1: yOf(v), y2: yOf(v),
+            stroke: "rgba(232,242,241,0.13)", "stroke-width": 1,
+          });
+          const t = add("text", {
+            x: L - 18, y: yOf(v) + 9, "text-anchor": "end",
+            fill: "#94afb6", "font-size": 28, "font-family": "Archivo",
+          });
+          t.textContent = String(v / 10);
+        });
+        const unit = add("text", {
+          x: L - 18, y: TOP - 26, "text-anchor": "end",
+          fill: "#7d9aa1", "font-size": 28, "font-family": "Archivo",
+        });
+        unit.textContent = "mm";
+
+        // bars
+        SEASONS.forEach(([season, v], i) => {
+          const x = L + i * band + 2;
+          const y = yOf(v);
+          const h = Math.max(3, BASE - y);
+          add("rect", {
+            class: "s2-bar", "data-i": i,
+            x, y, width: barW, height: h, rx: 3,
+            fill: v < STRIKE ? "#c28519" : "#2e9fc0",
+          });
+        });
+
+        // strike line + label, drawn last so they sit above the bars
+        add("line", {
+          id: "s2-strike", x1: L, x2: R, y1: yOf(STRIKE), y2: yOf(STRIKE),
+          stroke: "#e8f2f1", "stroke-width": 3,
+        });
+        const sl = add("text", {
+          id: "s2-strike-label", x: R, y: yOf(STRIKE) - 18, "text-anchor": "end",
+          fill: "#e8f2f1", "font-size": 28, "font-weight": 700, "font-family": "Archivo",
+        });
+        sl.textContent = "71.1 mm strike";
+
+        add("line", {
+          x1: L, x2: R, y1: BASE, y2: BASE,
+          stroke: "rgba(232,242,241,0.34)", "stroke-width": 1,
+        });
+
+        // a year label every ten seasons
+        SEASONS.forEach(([season], i) => {
+          if (season % 10 !== 0) return;
+          const t = add("text", {
+            x: L + i * band + band / 2, y: BASE + 42, "text-anchor": "middle",
+            fill: "#94afb6", "font-size": 28, "font-family": "Archivo",
+          });
+          t.textContent = String(season);
+        });
+      })();
+
+      // ---- build the bid rows
+      (function buildBids() {
+        const s3 = document.getElementById("s3");
+        BIDS.forEach(([who, amt], i) => {
+          const row = document.createElement("div");
+          row.className = "bid";
+          row.id = "bid-" + i;
+          row.style.top = 340 + i * 112 + "px";
+
+          const a = document.createElement("span");
+          a.className = "who";
+          a.textContent = who;
+
+          const b = document.createElement("span");
+          b.className = "amt";
+          b.textContent = amt;
+          const u = document.createElement("span");
+          u.textContent = "USDC";
+          b.appendChild(u);
+
+          row.appendChild(a);
+          row.appendChild(b);
+          s3.appendChild(row);
+        });
+
+        const win = document.createElement("p");
+        win.className = "body";
+        win.id = "s3-win";
+        win.textContent = "Lowest sealed bid wins.";
+        s3.appendChild(win);
+      })();
+
+      // ---- the single paused timeline
+      //
+      // Scenes hard-cut rather than crossfade: overlapping two scenes put the hook line
+      // on top of the chart's axis text for a quarter of a second, which the layout audit
+      // caught and a viewer would have read as a glitch. Each scene fades its own content
+      // out inside its own window instead.
+      //
+      // Every line is held past its reading floor (about 0.5s + 0.3s a word) before it
+      // fades or anything under it changes.
+      const tl = gsap.timeline({ paused: true });
+
+      // Scene 1 (0 - 5.0) — the land, then the sentence.
+      tl.fromTo("#s1-img", { scale: 1.0 }, { scale: 1.07, duration: 5, ease: "none" }, 0);
+      tl.fromTo("#s1-line1", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.9, ease: "power3.out" }, 0.35);
+      tl.fromTo("#s1-line2", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 2.6);
+      tl.to(["#s1-line1", "#s1-line2"], { opacity: 0, duration: 0.3 }, 4.7);
+
+      // Scene 2 (5.0 - 11.6) — the record accumulates, then the line that reads it.
+      tl.fromTo("#s2-head", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6 }, 5.2);
+      tl.fromTo("#s2-sub", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 5.4);
+      tl.fromTo(
+        ".s2-bar",
+        { scaleY: 0, transformOrigin: "50% 100%" },
+        { scaleY: 1, duration: 0.5, ease: "power2.out", stagger: 0.022 },
+        5.6,
+      );
+      tl.fromTo("#s2-strike", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 6.9);
+      tl.fromTo("#s2-strike-label", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 7.1);
+      tl.fromTo("#s2-foot", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.6 }, 7.6);
+      tl.to(["#s2-head", "#s2-sub", "#s2-chart", "#s2-foot"], { opacity: 0, duration: 0.3 }, 11.3);
+
+      // Scene 3 (11.6 - 18.4) — five bids, one at a time, each held long enough to read.
+      tl.fromTo("#s3-head", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.55 }, 11.8);
+      tl.fromTo("#s3-sub", { opacity: 0 }, { opacity: 1, duration: 0.45 }, 12.0);
+      BIDS.forEach(function (_, i) {
+        tl.fromTo(
+          "#bid-" + i,
+          { opacity: 0, x: -34 },
+          { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" },
+          12.4 + i * 0.5,
+        );
+      });
+      // The winner stays lit; the rest recede. The last row has held 1.9s by now.
+      tl.to(["#bid-1", "#bid-2", "#bid-3", "#bid-4"], { opacity: 0.35, duration: 0.5 }, 16.3);
+      tl.fromTo("#s3-win", { opacity: 0 }, { opacity: 1, duration: 0.45 }, 16.4);
+      tl.to(["#s3-head", "#s3-sub", "#s3-win", ".bid"], { opacity: 0, duration: 0.3 }, 18.1);
+
+      // Scene 4 (18.4 - 21.2) — the reading, then the payout.
+      tl.fromTo("#s4-reading", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 18.6);
+      tl.fromTo("#s4-against", { opacity: 0 }, { opacity: 1, duration: 0.45 }, 18.9);
+      tl.fromTo("#s4-paid", { opacity: 0, scale: 1.18 }, { opacity: 1, scale: 1, duration: 0.45, ease: "power4.out" }, 19.7);
+      tl.to(["#s4-reading", "#s4-against", "#s4-paid"], { opacity: 0, duration: 0.25 }, 20.95);
+
+      // Scene 5 (21.2 - 24.0) — the rain returns, and the closing line holds.
+      tl.fromTo("#s5-img", { scale: 1.06 }, { scale: 1.0, duration: 2.8, ease: "none" }, 21.2);
+      tl.fromTo("#s5-mark", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5 }, 21.35);
+      tl.fromTo("#s5-line", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.6 }, 21.5);
+      tl.fromTo("#s5-sub", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 21.8);
+
+      // The score fades out under the closing frame.
+      tl.to("#score", { volume: 0, duration: 1.2, ease: "power1.in" }, 22.8);
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

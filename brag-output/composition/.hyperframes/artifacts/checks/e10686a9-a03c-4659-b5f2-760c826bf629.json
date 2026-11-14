@@ -1,0 +1,1022 @@
+{
+  "ok": true,
+  "strict": false,
+  "browserSkipped": false,
+  "lint": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 6,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "audio_volume_tween_overrides_gain",
+        "severity": "warning",
+        "message": "#score has data-volume=\"0.78\" (-2.2 dB) and a GSAP tween on `volume`. Tween values are absolute: they REPLACE this gain rather than scale it, so wherever the tween names a value the clip plays at that value, not at -2.2 dB.",
+        "selector": "#score",
+        "dataAttributes": {},
+        "sourceFile": "/Users/romeoscript/Desktop/Mmiri/brag-output/composition/index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Write the tween's targets in the same absolute gain (e.g. `volume: 1.95`, not `volume: 1`), or reset data-volume to 1 and let the tween carry the level on its own."
+      },
+      {
+        "code": "nested_structure_needs_subcomposition",
+        "severity": "warning",
+        "message": "<div id=\"s1\"> is a timeline element that contains nested <div>. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.",
+        "selector": "#s1",
+        "dataAttributes": {},
+        "sourceFile": "/Users/romeoscript/Desktop/Mmiri/brag-output/composition/index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move <div id=\"s1\"> and its contents into a sub-composition file and mount it with data-composition-src."
+      },
+      {
+        "code": "nested_structure_needs_subcomposition",
+        "severity": "warning",
+        "message": "<div id=\"s2\"> is a timeline element that contains nested <h2 id=\"s2-head\">. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.",
+        "selector": "#s2",
+        "dataAttributes": {},
+        "sourceFile": "/Users/romeoscript/Desktop/Mmiri/brag-output/composition/index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move <div id=\"s2\"> and its contents into a sub-composition file and mount it with data-composition-src."
+      },
+      {
+        "code": "nested_structure_needs_subcomposition",
+        "severity": "warning",
+        "message": "<div id=\"s3\"> is a timeline element that contains nested <h2 id=\"s3-head\">. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.",
+        "selector": "#s3",
+        "dataAttributes": {},
+        "sourceFile": "/Users/romeoscript/Desktop/Mmiri/brag-output/composition/index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move <div id=\"s3\"> and its contents into a sub-composition file and mount it with data-composition-src."
+      },
+      {
+        "code": "nested_structure_needs_subcomposition",
+        "severity": "warning",
+        "message": "<div id=\"s4\"> is a timeline element that contains nested <p id=\"s4-reading\">. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.",
+        "selector": "#s4",
+        "dataAttributes": {},
+        "sourceFile": "/Users/romeoscript/Desktop/Mmiri/brag-output/composition/index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move <div id=\"s4\"> and its contents into a sub-composition file and mount it with data-composition-src."
+      },
+      {
+        "code": "nested_structure_needs_subcomposition",
+        "severity": "warning",
+        "message": "<div id=\"s5\"> is a timeline element that contains nested <div>. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.",
+        "selector": "#s5",
+        "dataAttributes": {},
+        "sourceFile": "/Users/romeoscript/Desktop/Mmiri/brag-output/composition/index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move <div id=\"s5\"> and its contents into a sub-composition file and mount it with data-composition-src."
+      }
+    ],
+    "filesScanned": 1
+  },
+  "runtime": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": []
+  },
+  "layout": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 2,
+    "infoCount": 2,
+    "findings": [
+      {
+        "code": "content_overlap",
+        "severity": "warning",
+        "time": 4.625,
+        "selector": "#s1-line1",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 150,
+          "top": 478.69,
+          "right": 981.55,
+          "bottom": 751.56,
+          "width": 831.55,
+          "height": 272.87
+        },
+        "containerSelector": "#s2-chart > text:nth-of-type(2)",
+        "text": "Nobody told the underwriters the climate is drying.",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply. Decoration nobody needs to read can take data-layout-ignore.",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 150,
+          "y": 478.69,
+          "width": 831.55,
+          "height": 272.87
+        },
+        "firstSeen": 4.625,
+        "lastSeen": 4.75,
+        "occurrences": 2,
+        "heldMs": 125,
+        "times": [
+          4.625,
+          4.75
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "warning",
+        "time": 4.625,
+        "selector": "#s1-line2",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 150,
+          "top": 796.25,
+          "right": 533.42,
+          "bottom": 844.25,
+          "width": 383.42,
+          "height": 48
+        },
+        "containerSelector": "#s2-chart > text:nth-of-type(8)",
+        "text": "The rainfall did.",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply. Decoration nobody needs to read can take data-layout-ignore.",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 150,
+          "y": 796.25,
+          "width": 383.42,
+          "height": 48
+        },
+        "firstSeen": 4.625,
+        "lastSeen": 4.75,
+        "occurrences": 2,
+        "heldMs": 125,
+        "times": [
+          4.625,
+          4.75
+        ]
+      },
+      {
+        "code": "container_overflow",
+        "severity": "info",
+        "time": 1.167,
+        "selector": "#s1-img",
+        "message": "Element extends outside a clipping layout container.",
+        "rect": {
+          "left": -15.65,
+          "top": -8.8,
+          "right": 1935.65,
+          "bottom": 1088.8,
+          "width": 1951.3,
+          "height": 1097.6
+        },
+        "containerSelector": "#s1 > div:nth-of-type(1)",
+        "fixHint": "Resize/reposition the child or container, or mark intentional overflow with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "left": 15.65,
+          "right": 15.65,
+          "top": 8.8,
+          "bottom": 8.8
+        },
+        "dataAttributes": {
+          "data-hf-render-id": "s1-img",
+          "data-hf-authored-opacity": ""
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": -15.65,
+          "y": -8.8,
+          "width": 1951.3,
+          "height": 1097.6
+        },
+        "firstSeen": 1.167,
+        "lastSeen": 3.5,
+        "occurrences": 2,
+        "heldMs": 0,
+        "times": [
+          1.167,
+          3.5
+        ]
+      },
+      {
+        "code": "container_overflow",
+        "severity": "info",
+        "time": 19.833,
+        "selector": "#s5-img",
+        "message": "Element extends outside a clipping layout container.",
+        "rect": {
+          "left": -25.63,
+          "top": -14.42,
+          "right": 1945.63,
+          "bottom": 1094.42,
+          "width": 1971.26,
+          "height": 1108.84
+        },
+        "containerSelector": "#s5 > div:nth-of-type(1)",
+        "fixHint": "Resize/reposition the child or container, or mark intentional overflow with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "left": 25.63,
+          "right": 25.63,
+          "top": 14.42,
+          "bottom": 14.42
+        },
+        "dataAttributes": {
+          "data-hf-render-id": "s5-img",
+          "data-hf-authored-opacity": ""
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": -25.63,
+          "y": -14.42,
+          "width": 1971.26,
+          "height": 1108.84
+        },
+        "firstSeen": 19.833,
+        "lastSeen": 19.833,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          19.833
+        ]
+      }
+    ],
+    "duration": 21,
+    "samples": [
+      1.167,
+      3.5,
+      5.833,
+      8.167,
+      10.5,
+      12.833,
+      15.167,
+      17.5,
+      19.833
+    ],
+    "transitionSamples": [],
+    "transitionSamplesDropped": 0,
+    "tolerance": 2,
+    "totalIssueCount": 4,
+    "truncated": false
+  },
+  "motion": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [],
+    "enabled": false,
+    "samples": 0
+  },
+  "contrast": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [],
+    "enabled": true,
+    "samples": [
+      1.167,
+      5.833,
+      10.5,
+      15.167,
+      19.833
+    ],
+    "checked": 35,
+    "passed": 35
+  },
+  "craft": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 7,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "text_below_floor",
+        "severity": "warning",
+        "message": "Type floor is 28 px (2.6% of the 1080 px short side, what a phone can read) and 15 text elements stay under it for 0.5 s or more, the smallest \"mm\" at 22 px: set reading text to at least 28 px, or put data-layout-ignore on text that is texture rather than reading; see references/look.md.",
+        "text": "mm",
+        "selector": "#s2-chart > text:nth-of-type(6)",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 124.16,
+          "y": 255,
+          "width": 37.84,
+          "height": 24
+        },
+        "time": 4.625,
+        "times": [
+          4.625,
+          4.625,
+          4.625,
+          4.625,
+          4.625,
+          4.625,
+          4.625,
+          4.625,
+          4.625,
+          4.625,
+          11,
+          11.375,
+          11.75,
+          12.25,
+          12.625
+        ],
+        "fontPx": 22,
+        "floorPx": 28,
+        "seconds": 5.625,
+        "elements": [
+          {
+            "selector": "#s2-chart > text:nth-of-type(6)",
+            "text": "mm",
+            "fontPx": 22,
+            "time": 4.625,
+            "seconds": 5.625
+          },
+          {
+            "selector": "#s2-chart > text:nth-of-type(1)",
+            "text": "0",
+            "fontPx": 24,
+            "time": 4.625,
+            "seconds": 5.625
+          },
+          {
+            "selector": "#s2-chart > text:nth-of-type(2)",
+            "text": "100",
+            "fontPx": 24,
+            "time": 4.625,
+            "seconds": 5.625
+          },
+          {
+            "selector": "#s2-chart > text:nth-of-type(3)",
+            "text": "200",
+            "fontPx": 24,
+            "time": 4.625,
+            "seconds": 5.625
+          },
+          {
+            "selector": "#s2-chart > text:nth-of-type(4)",
+            "text": "300",
+            "fontPx": 24,
+            "time": 4.625,
+            "seconds": 5.625
+          },
+          {
+            "selector": "#s2-chart > text:nth-of-type(5)",
+            "text": "400",
+            "fontPx": 24,
+            "time": 4.625,
+            "seconds": 5.625
+          },
+          {
+            "selector": "#s2-chart > text:nth-of-type(8)",
+            "text": "1990",
+            "fontPx": 24,
+            "time": 4.625,
+            "seconds": 5.625
+          },
+          {
+            "selector": "#s2-chart > text:nth-of-type(9)",
+            "text": "2000",
+            "fontPx": 24,
+            "time": 4.625,
+            "seconds": 5.625
+          },
+          {
+            "selector": "#s2-chart > text:nth-of-type(10)",
+            "text": "2010",
+            "fontPx": 24,
+            "time": 4.625,
+            "seconds": 5.625
+          },
+          {
+            "selector": "#s2-chart > text:nth-of-type(11)",
+            "text": "2020",
+            "fontPx": 24,
+            "time": 4.625,
+            "seconds": 5.625
+          },
+          {
+            "selector": "#bid-0 > span:nth-of-type(2) > span:nth-of-type(1)",
+            "text": "USDC",
+            "fontPx": 26,
+            "time": 11,
+            "seconds": 4.75
+          },
+          {
+            "selector": "#bid-1 > span:nth-of-type(2) > span:nth-of-type(1)",
+            "text": "USDC",
+            "fontPx": 26,
+            "time": 11.375,
+            "seconds": 2.25
+          },
+          {
+            "selector": "#bid-2 > span:nth-of-type(2) > span:nth-of-type(1)",
+            "text": "USDC",
+            "fontPx": 26,
+            "time": 11.75,
+            "seconds": 1.875
+          },
+          {
+            "selector": "#bid-3 > span:nth-of-type(2) > span:nth-of-type(1)",
+            "text": "USDC",
+            "fontPx": 26,
+            "time": 12.25,
+            "seconds": 1.375
+          },
+          {
+            "selector": "#bid-4 > span:nth-of-type(2) > span:nth-of-type(1)",
+            "text": "USDC",
+            "fontPx": 26,
+            "time": 12.625,
+            "seconds": 1
+          }
+        ]
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"9 of 45 seasons would have paid. 6 of those 9 since 2011.\" (13 words) is on screen 2.97 s (±0.01 s), under its 3.30 s floor: hold it about 0.5 s + 0.3 s a word (4.40 s here) before it leaves or changes; see references/motion.md.",
+        "text": "9 of 45 seasons would have paid. 6 of those 9 since 2011.",
+        "selector": "#s2-foot",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 150,
+          "y": 944.72,
+          "width": 1256.73,
+          "height": 46
+        },
+        "time": 7.203,
+        "words": 13,
+        "seconds": 2.969,
+        "floorSeconds": 3.3,
+        "measured": [
+          {
+            "time": 6.875,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 7,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 7.125,
+            "opacity": 0.31,
+            "heightPx": 46
+          },
+          {
+            "time": 7.25,
+            "opacity": 0.63,
+            "heightPx": 46
+          },
+          {
+            "time": 7.375,
+            "opacity": 0.85,
+            "heightPx": 46
+          },
+          {
+            "time": 7.5,
+            "opacity": 0.97,
+            "heightPx": 46
+          },
+          {
+            "time": 7.625,
+            "opacity": 1,
+            "heightPx": 46
+          },
+          {
+            "time": 9.75,
+            "opacity": 1,
+            "heightPx": 46
+          },
+          {
+            "time": 9.875,
+            "opacity": 1,
+            "heightPx": 46
+          },
+          {
+            "time": 10,
+            "opacity": 0.99,
+            "heightPx": 46
+          },
+          {
+            "time": 10.125,
+            "opacity": 0.79,
+            "heightPx": 46
+          },
+          {
+            "time": 10.25,
+            "opacity": 0.1,
+            "heightPx": 46
+          },
+          {
+            "time": 10.375,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 10.5,
+            "opacity": null,
+            "heightPx": null
+          }
+        ]
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"uw-4 Cautious\" (3 words) is on screen 1.00 s (±0.01 s), under its 1.05 s floor: hold it about 0.5 s + 0.3 s a word (1.40 s here) before it leaves or changes; see references/motion.md.",
+        "text": "uw-4 Cautious",
+        "selector": "#bid-4 > span:nth-of-type(1)",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 140.17,
+          "y": 814,
+          "width": 261,
+          "height": 43
+        },
+        "time": 12.57,
+        "words": 3,
+        "seconds": 1,
+        "floorSeconds": 1.05,
+        "measured": [
+          {
+            "time": 12.25,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 12.375,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 12.5,
+            "opacity": 0.17,
+            "heightPx": 43
+          },
+          {
+            "time": 12.625,
+            "opacity": 0.71,
+            "heightPx": 43
+          },
+          {
+            "time": 12.75,
+            "opacity": 0.96,
+            "heightPx": 43
+          },
+          {
+            "time": 12.875,
+            "opacity": 1,
+            "heightPx": 43
+          },
+          {
+            "time": 13,
+            "opacity": 1,
+            "heightPx": 43
+          },
+          {
+            "time": 13.125,
+            "opacity": 1,
+            "heightPx": 43
+          },
+          {
+            "time": 13.25,
+            "opacity": 1,
+            "heightPx": 43
+          },
+          {
+            "time": 13.375,
+            "opacity": 0.84,
+            "heightPx": 43
+          },
+          {
+            "time": 13.5,
+            "opacity": 0.58,
+            "heightPx": 43
+          },
+          {
+            "time": 13.625,
+            "opacity": 0.45,
+            "heightPx": 43
+          },
+          {
+            "time": 13.75,
+            "opacity": 0.36,
+            "heightPx": 43
+          },
+          {
+            "time": 13.875,
+            "opacity": 0.35,
+            "heightPx": 43
+          }
+        ]
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"Lowest sealed bid takes the risk and locks the full payou...\" (13 words) is on screen 2.00 s (±0.01 s), under its 3.30 s floor: hold it about 0.5 s + 0.3 s a word (4.40 s here) before it leaves or changes; see references/motion.md.",
+        "text": "Lowest sealed bid takes the risk and locks the full payout as collateral.",
+        "selector": "#s3-win",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 150,
+          "y": 939,
+          "width": 1054.55,
+          "height": 37
+        },
+        "time": 13.672,
+        "words": 13,
+        "seconds": 2,
+        "floorSeconds": 3.3,
+        "measured": [
+          {
+            "time": 13.375,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 13.5,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 13.625,
+            "opacity": 0.36,
+            "heightPx": 37
+          },
+          {
+            "time": 13.75,
+            "opacity": 0.72,
+            "heightPx": 37
+          },
+          {
+            "time": 13.875,
+            "opacity": 0.93,
+            "heightPx": 37
+          },
+          {
+            "time": 14,
+            "opacity": 1,
+            "heightPx": 37
+          },
+          {
+            "time": 14.125,
+            "opacity": 1,
+            "heightPx": 37
+          },
+          {
+            "time": 15.25,
+            "opacity": 1,
+            "heightPx": 37
+          },
+          {
+            "time": 15.375,
+            "opacity": 1,
+            "heightPx": 37
+          },
+          {
+            "time": 15.5,
+            "opacity": 0.99,
+            "heightPx": 37
+          },
+          {
+            "time": 15.625,
+            "opacity": 0.79,
+            "heightPx": 37
+          },
+          {
+            "time": 15.75,
+            "opacity": 0.1,
+            "heightPx": 37
+          },
+          {
+            "time": 15.875,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 16,
+            "opacity": null,
+            "heightPx": null
+          }
+        ]
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"Policy 7 — 50 USDC to the holder. No claim filed.\" (10 words) is on screen 1.13 s (±0.01 s), under its 2.63 s floor: hold it about 0.5 s + 0.3 s a word (3.50 s here) before it leaves or changes; see references/motion.md.",
+        "text": "Policy 7 — 50 USDC to the holder. No claim filed.",
+        "selector": "#s4-receipt",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 156,
+          "y": 790,
+          "width": 737.03,
+          "height": 37
+        },
+        "time": 17.273,
+        "words": 10,
+        "seconds": 1.133,
+        "floorSeconds": 2.625,
+        "measured": [
+          {
+            "time": 17,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 17.125,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 17.25,
+            "opacity": 0.46,
+            "heightPx": 37
+          },
+          {
+            "time": 17.375,
+            "opacity": 0.78,
+            "heightPx": 37
+          },
+          {
+            "time": 17.5,
+            "opacity": 0.96,
+            "heightPx": 37
+          },
+          {
+            "time": 17.625,
+            "opacity": 1,
+            "heightPx": 37
+          },
+          {
+            "time": 17.75,
+            "opacity": 1,
+            "heightPx": 37
+          },
+          {
+            "time": 18,
+            "opacity": 1,
+            "heightPx": 37
+          },
+          {
+            "time": 18.125,
+            "opacity": 1,
+            "heightPx": 37
+          },
+          {
+            "time": 18.25,
+            "opacity": 1,
+            "heightPx": 37
+          },
+          {
+            "time": 18.375,
+            "opacity": 0.57,
+            "heightPx": 37
+          },
+          {
+            "time": 18.5,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 18.625,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 18.75,
+            "opacity": null,
+            "heightPx": null
+          }
+        ]
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "The film's last line \"Rainfall cover, priced by a market\" (6 words) is on screen 1.96 s (±0.01 s), under the 2.00 s a closing line needs: hold it about 0.5 s + 0.3 s a word and at least 2 s before the film ends; see references/motion.md.",
+        "text": "Rainfall cover, priced by a market",
+        "selector": "#s5-line",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 150,
+          "y": 783.04,
+          "width": 1376.28,
+          "height": 78
+        },
+        "time": 19.039,
+        "words": 6,
+        "seconds": 1.965,
+        "floorSeconds": 2,
+        "measured": [
+          {
+            "time": 18.75,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 18.875,
+            "opacity": 0.17,
+            "heightPx": 78
+          },
+          {
+            "time": 19,
+            "opacity": 0.46,
+            "heightPx": 78
+          },
+          {
+            "time": 19.125,
+            "opacity": 0.64,
+            "heightPx": 78
+          },
+          {
+            "time": 19.25,
+            "opacity": 0.82,
+            "heightPx": 78
+          },
+          {
+            "time": 19.375,
+            "opacity": 0.94,
+            "heightPx": 78
+          },
+          {
+            "time": 19.5,
+            "opacity": 1,
+            "heightPx": 78
+          },
+          {
+            "time": 20.5,
+            "opacity": 1,
+            "heightPx": 78
+          },
+          {
+            "time": 20.625,
+            "opacity": 1,
+            "heightPx": 78
+          },
+          {
+            "time": 20.75,
+            "opacity": 1,
+            "heightPx": 78
+          },
+          {
+            "time": 20.875,
+            "opacity": 1,
+            "heightPx": 78
+          }
+        ]
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "The film's last line \"Built at NEAR HACKATHON — mmiri on NEAR testnet\" (8 words) is on screen 1.50 s (±0.01 s), under the 2.17 s a closing line needs: hold it about 0.5 s + 0.3 s a word and at least 2 s before the film ends; see references/motion.md.",
+        "text": "Built at NEAR HACKATHON — mmiri on NEAR testnet",
+        "selector": "#s5-sub",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 154,
+          "y": 880,
+          "width": 727.78,
+          "height": 32
+        },
+        "time": 19.5,
+        "words": 8,
+        "seconds": 1.504,
+        "floorSeconds": 2.175,
+        "measured": [
+          {
+            "time": 19.125,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 19.25,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 19.375,
+            "opacity": 0.21,
+            "heightPx": 32
+          },
+          {
+            "time": 19.5,
+            "opacity": 0.56,
+            "heightPx": 32
+          },
+          {
+            "time": 19.625,
+            "opacity": 0.75,
+            "heightPx": 32
+          },
+          {
+            "time": 19.75,
+            "opacity": 0.92,
+            "heightPx": 32
+          },
+          {
+            "time": 19.875,
+            "opacity": 1,
+            "heightPx": 32
+          },
+          {
+            "time": 20.5,
+            "opacity": 1,
+            "heightPx": 32
+          },
+          {
+            "time": 20.625,
+            "opacity": 1,
+            "heightPx": 32
+          },
+          {
+            "time": 20.75,
+            "opacity": 1,
+            "heightPx": 32
+          },
+          {
+            "time": 20.875,
+            "opacity": 1,
+            "heightPx": 32
+          }
+        ]
+      }
+    ],
+    "enabled": true,
+    "step": 0.125,
+    "samples": 168
+  },
+  "audio": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": []
+  },
+  "hdr": {
+    "autoPromotion": null,
+    "inspection": "available"
+  },
+  "snapshots": {
+    "enabled": false,
+    "files": [],
+    "times": [],
+    "findingFiles": []
+  }
+}
