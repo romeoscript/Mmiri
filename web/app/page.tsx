@@ -138,25 +138,32 @@ export default async function Home({
     <main>
       <Choreography />
       <Reveal>
-        <section className="hero">
-          <RainField />
-          <h1 className="display" data-animate>
-            Rainfall cover,
-            <br />
-            priced by a market
-          </h1>
-          <p className="lede" data-animate>
-            Assessing a two-hectare farm costs more than the policy is worth, so smallholders
-            cannot buy drought cover. Mmiri removes the assessor: five underwriter agents bid
-            against each other for the risk, and the rainfall record settles it.
-          </p>
-          <div className="btn-row" data-animate>
-            <a className="btn btn-primary" href="#price">
-              Get cover
-            </a>
-            <a className="btn btn-ghost" href="/simulation">
-              See 15 seasons backtested
-            </a>
+        <section className="hero-photo">
+          <div className="hero-media">
+            {/* Decorative: the headline beside it already says what this is. */}
+            <img src="/img/wet.webp" alt="" fetchPriority="high" />
+            <RainField />
+          </div>
+          <div className="hero-copy">
+            <h1 className="display" data-animate>
+              Rainfall cover,
+              <br />
+              priced by a market
+            </h1>
+            <p className="lede" data-animate>
+              Assessing a two-hectare farm costs more than the policy is worth, so
+              smallholders cannot buy drought cover. Mmiri removes the assessor: five
+              underwriter agents bid against each other for the risk, and the rainfall
+              record settles it.
+            </p>
+            <div className="btn-row" data-animate>
+              <a className="btn btn-primary" href="#price">
+                Get cover
+              </a>
+              <a className="btn btn-ghost" href="/simulation">
+                See 15 seasons backtested
+              </a>
+            </div>
           </div>
         </section>
 
@@ -399,8 +406,16 @@ export default async function Home({
         ) : null}
       </section>
 
-      <section>
+      <div className="band band-photo">
+        <div className="band-media">
+          <img src="/img/dry.webp" alt="" loading="lazy" />
+        </div>
+        <div className="band-inner">
         <h2 data-reveal="clip">Why this needs a market and not a formula</h2>
+        <p className="lede" style={{ maxWidth: "46ch" }}>
+          {h.all.k} of the {h.all.n} seasons on record at {s.name} ended like the ground
+          behind this text.
+        </p>
         <div className="readings cols-3">
           <div className="reading is-wet">
             <span className="value">{(h.allRate * 100).toFixed(1)}%</span>
@@ -433,7 +448,8 @@ export default async function Home({
           about a changing climate. So Mmiri does not pick. It runs an auction, and the
           underwriters that misprice the risk lose their own capital.
         </p>
-      </section>
+        </div>
+      </div>
 
       <div className="band">
         <div className="band-inner">

@@ -89,17 +89,35 @@ export function Choreography() {
         });
       });
 
-      // The weather drifts slower than the page it sits behind.
-      const rain = document.querySelector(".hero .rain-field");
+      // The land drifts slower than the page, and the weather slower still, so the hero
+      // gains a little depth as it leaves rather than sliding off as one flat plate.
+      const photo = document.querySelector(".hero-photo .hero-media img");
+      if (photo) {
+        gsap.fromTo(
+          photo,
+          { yPercent: -6, scale: 1.08 },
+          {
+            yPercent: 6,
+            ease: "none",
+            scrollTrigger: {
+              trigger: ".hero-photo",
+              start: "top top",
+              end: "bottom top",
+              scrub: 0.5,
+            },
+          },
+        );
+      }
+      const rain = document.querySelector(".hero-photo .rain-field");
       if (rain) {
         gsap.to(rain, {
-          yPercent: 18,
+          yPercent: 16,
           ease: "none",
           scrollTrigger: {
-            trigger: ".hero",
+            trigger: ".hero-photo",
             start: "top top",
             end: "bottom top",
-            scrub: 0.6,
+            scrub: 0.75,
           },
         });
       }
