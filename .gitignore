@@ -38,3 +38,5 @@ oracle/target/
 
 # impeccable design-hook cache (the scoped ignores in config.json are tracked)
 .impeccable/hook.cache.json
+.vercel
+.env*

@@ -1,0 +1,23 @@
+# What the deployment does not need. The web app is built from web/, but it imports the
+# rainfall fixture and the simulation results from sim/, so the deploy root is the repository
+# root and those two directories have to travel with it.
+node_modules
+.git
+.next
+web/.next
+web/node_modules
+
+# Rust build output — the contracts are deployed to NEAR, not to Vercel
+target
+oracle/target
+contracts/target
+**/*.wasm
+
+# Films and their sources: tens of megabytes, and nothing imports them
+demo-output
+brag-output
+
+# Local tooling state
+.impeccable
+.mmiri
+.claude
