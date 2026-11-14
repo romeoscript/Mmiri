@@ -137,6 +137,44 @@ impl Contract {
     }
 
     // -----------------------------------------------------------------------
+    // Oracle configuration
+    // -----------------------------------------------------------------------
+
+    /// Point the OutLayer path at a published oracle binary. Owner only.
+    ///
+    /// `new` takes these two values at deployment, which is enough right up until the
+    /// oracle is rebuilt or published somewhere else. Without a setter, a deployment that
+    /// started with an empty url can never call `settle` at all, and moving to a new
+    /// binary would mean redeploying to a fresh account and recreating every agent —
+    /// their function-call keys are bound to this contract and cannot be re-pointed.
+    ///
+    /// This widens the owner's power by exactly one thing: choosing which pinned binary
+    /// settles policies. It cannot move money, and the hash still has to match the bytes
+    /// the worker actually fetches, so the owner chooses the code but cannot forge its
+    /// output. A settlement already in flight is unaffected — it resolves against its
+    /// callback, not against this config.
+    pub fn set_oracle_wasm(&mut self, url: String, sha256: String) {
+        require!(
+            env::predecessor_account_id() == self.config.owner_id,
+            "only the owner can set the oracle binary"
+        );
+        // Both or neither. A url with no hash would let a worker serve anything it liked.
+        require!(
+            url.is_empty() == sha256.is_empty(),
+            "url and sha256 must be set together, or both cleared"
+        );
+        require!(
+            sha256.is_empty()
+                || (sha256.len() == 64
+                    && sha256.bytes().all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))),
+            "sha256 must be 64 lowercase hex characters"
+        );
+        env::log_str(&format!("oracle wasm set to {url} ({sha256})"));
+        self.config.oracle_wasm_url = url;
+        self.config.oracle_wasm_sha256 = sha256;
+    }
+
+    // -----------------------------------------------------------------------
     // Underwriter capital
     // -----------------------------------------------------------------------
 

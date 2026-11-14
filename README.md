@@ -177,8 +177,19 @@ while writing this:
 ./scripts/build-oracle
 ```
 
-Produces a 338 KB `wasm32-wasip2` component and prints its sha256, which is what the contract
-pins so a worker cannot substitute different code.
+Produces a 344,805-byte `wasm32-wasip2` component and prints its sha256, which is what the
+contract pins so a worker cannot substitute different code. Publish the file somewhere
+OutLayer can fetch over https — this repository uses a release asset — then point the
+contract at it:
+
+```bash
+near contract call-function as-transaction $MMIRI_MARKET set_oracle_wasm \
+  json-args "{\"url\":\"$ORACLE_WASM_URL\",\"sha256\":\"$ORACLE_WASM_SHA256\"}" \
+  prepaid-gas '30 Tgas' attached-deposit '0 NEAR' \
+  sign-as $MMIRI_PARENT network-config testnet sign-with-keychain send
+```
+
+Until both are set, `settle` refuses and the deployment settles through the keeper instead.
 
 ### 7. Deploy to testnet
 
@@ -199,16 +210,30 @@ These scripts have been run, and the deployment they produced is live on NEAR te
 | Keeper | [`keeper.mmiri-demo.testnet`](https://testnet.nearblocks.io/address/keeper.mmiri-demo.testnet) |
 | Underwriters | `uw-1` … `uw-5.mmiri-demo.testnet` |
 
-Two rounds have completed end to end, one of each outcome:
+Three rounds have completed end to end, covering both outcomes and both oracle paths:
 
-- **Policy 7 — paid out.** Enugu, 30 days from 15 April 2025. Five agents committed sealed
-  bids, all five revealed, `uw-1` won at **9.13 USDC**, the keeper posted **53.6 mm** against
-  the 60 mm strike, and the 50 USDC payout went to the policy holder. Status `PaidOut`.
-- **Policy 8 — expired.** The same terms for 2026, which totalled **113.7 mm**. No payout, and
-  the underwriter's collateral was unlocked. Status `Expired`.
+- **Policy 7 — paid out, keeper path.** Enugu, 30 days from 15 April 2025. Five agents
+  committed sealed bids, all five revealed, `uw-1` won at **9.13 USDC**, the keeper posted
+  **53.6 mm** against the 60 mm strike, and the 50 USDC payout went to the holder. `PaidOut`.
+- **Policy 8 — expired, keeper path.** The same terms for 2026, which totalled **113.7 mm**.
+  No payout, and the underwriter's collateral was unlocked. `Expired`.
+- **Policy 9 — paid out, OutLayer path.** The 2025 terms again, settled by `settle` rather
+  than `submit_observation`. An OutLayer worker fetched the pinned oracle binary, checked its
+  sha256, compiled it, ran it in the TEE and reached NASA: **345,888 instructions, 1,098 ms**,
+  `success: true`. It returned **53.6 mm** — the same figure the keeper posted and the same
+  figure `pnpm verify-oracle` recomputes locally. The reading is recorded on chain with
+  `source: OutLayer`. Cost **0.0012646 NEAR**, with 0.0087354 of the attached 0.01 refunded.
 
-Both readings reproduce from the public record with `pnpm verify-oracle`, and
+All three readings reproduce from the public record with `pnpm verify-oracle`, and
 `./scripts/print-key-permissions` reads the agents' key restrictions back off the chain.
+
+The oracle binary those workers fetch is published as a release asset, and the contract pins
+its hash, so "did the right code run" is a checkable fact rather than a promise:
+
+```
+https://github.com/romeoscript/Mmiri/releases/download/oracle-v0.1.0/mmiri-oracle.wasm
+sha256 7c4a42c8a508969d4bb6760bd5ba7f9d348e3226a3e701d9f550fcf80b8ab326
+```
 
 ---
 
@@ -348,15 +373,25 @@ then has to honour:
   rounds on windows that have already started so a real season can be replayed before the
   deadline. It relaxes invariant 6 and **nothing else**: a policy still cannot pay twice, pay
   early, or pay the wrong account. It is visible on chain via the `is_demo_mode` view.
-- **The oracle trust model as actually shipped.** The contract supports two paths. The
-  OutLayer path runs a sha256-pinned WASM in a TEE; the keeper path lets a trusted account
-  post the reading. **Settlement has run end to end on the keeper path on testnet — policies
-  7 and 8 — and has never run on the OutLayer path.** The oracle component is built and its
-  logic tested, but whether OutLayer's testnet workers can reach `power.larc.nasa.gov` is
-  still unverified. In keeper mode the keeper is trusted completely — it could post a reading
-  that is not true — and `scripts/verify-oracle` makes that detectable after the fact, not
-  impossible. The keeper's key is scoped to `submit_observation` and nothing else, so a stolen
-  keeper key can lie about rainfall but cannot move money.
+- **The oracle trust model as actually shipped.** The contract supports two paths, and
+  **both have now settled a policy on testnet**: the keeper path for policies 7 and 8, and
+  the OutLayer path for policy 9. The OutLayer path runs a sha256-pinned WASM in a TEE and
+  needs no trusted party — the worker proved it could reach `power.larc.nasa.gov`, which was
+  the one thing in this design that could have failed for reasons outside this repository.
+  The keeper path remains as a fallback, and in it the keeper is trusted completely: it could
+  post a reading that is not true, and `scripts/verify-oracle` makes that detectable after
+  the fact rather than impossible. The keeper's key is scoped to `submit_observation` alone,
+  so a stolen keeper key can lie about rainfall but cannot move money.
+- **The owner chooses which oracle binary settles.** `set_oracle_wasm` is owner-only and was
+  added so a rebuilt or relocated oracle does not require redeploying to a fresh account —
+  which, because the agents' function-call keys are bound to one market contract and cannot
+  be re-pointed, would mean recreating every agent. It widens the owner's power by exactly
+  one thing: picking the pinned binary. It cannot move money, and the hash must still match
+  the bytes the worker fetches, so the owner selects the code but cannot forge its output.
+- **`execution_ref` on an OutLayer reading is empty.** The contract looks for an execution id
+  in the oracle's return value, but OutLayer returns only the binary's stdout; the id appears
+  in its `execution_completed` event instead. The settling transaction hash is the audit link
+  in practice, and the field should either be populated from the event or dropped.
 - **AI assistance.** Built with Claude Code throughout, under my direction, within the
   hackathon window. The design brief, the gate decisions and every approval are mine.
 - **Libraries.** near-sdk 5.30.1, near-contract-standards 5.30.1, near-workspaces 0.24.0,
@@ -373,10 +408,6 @@ then has to honour:
 
 Stated plainly, because a README that overpromises is worse than a small honest one.
 
-- **The OutLayer oracle path has never run.** Settlement on testnet has only been done
-  through the keeper. The oracle component builds and its arithmetic is tested, but whether
-  OutLayer's testnet workers can reach `power.larc.nasa.gov` is still an open question, and it
-  is the one thing here that can fail for reasons outside this repository.
 - **The live Intents path is not exercised.** Quotes are real; submitting a deposit and
   polling `/v0/status` through to SUCCESS is implemented behind `ONECLICK_LIVE` and has never
   been run with real funds.
