@@ -1,4 +1,5 @@
-import { RainfallHistory } from "@/components/charts";
+import { RainRecord } from "@/components/rain-record";
+import { Reveal } from "@/components/reveal";
 import { SiteControls } from "@/components/site-controls";
 import {
   SITE_ORDER,
@@ -7,7 +8,6 @@ import {
   mm,
   site,
   sites,
-  usdc,
   windowLabel,
 } from "@/lib/data";
 import { MARKET_ID, contractConfigured } from "@/lib/near";
@@ -17,6 +17,57 @@ export const dynamic = "force-dynamic";
 
 const SEASON = 2026;
 const PAYOUTS = [30, 50, 80] as const;
+const EXPLORER = "https://testnet.nearblocks.io/address";
+
+const STEPS = [
+  {
+    title: "You ask for cover",
+    body: "One place, one 30-day window, and the most you are willing to pay. The maximum goes into escrow with the request.",
+  },
+  {
+    title: "Agents bid blind",
+    body: "Five underwriters submit a hash of their premium and a secret salt. Nobody can read anyone else's price.",
+  },
+  {
+    title: "Bids are opened",
+    body: "After the window closes each agent reveals. The contract recomputes the hash, so no bid can change after the fact.",
+  },
+  {
+    title: "The lowest price wins",
+    body: "The cheapest revealed premium at or under your maximum takes the risk and locks the full payout as collateral.",
+  },
+  {
+    title: "Rainfall decides",
+    body: "The oracle reads NASA's record for your window. Below the strike, the payout moves. Nobody files a claim.",
+  },
+];
+
+const SETTLED = [
+  {
+    id: 7,
+    outcome: "Paid out",
+    reading: "53.6 mm",
+    detail: "below the 60.0 mm strike — 50 USDC went to the holder",
+    dry: true,
+    source: "keeper",
+  },
+  {
+    id: 9,
+    outcome: "Paid out",
+    reading: "53.6 mm",
+    detail: "settled by an OutLayer worker inside a TEE, not a trusted account",
+    dry: true,
+    source: "OutLayer",
+  },
+  {
+    id: 8,
+    outcome: "Expired",
+    reading: "113.7 mm",
+    detail: "well above the strike — no payout, collateral released",
+    dry: false,
+    source: "keeper",
+  },
+];
 
 export default async function Home({
   searchParams,
@@ -54,151 +105,301 @@ export default async function Home({
     .sort((a, b) => (a.q.premium! < b.q.premium! ? -1 : 1));
 
   const best = quotes[0];
+  const dearest = quotes[quotes.length - 1];
+
+  // Only seasons that ended before the one being quoted. Showing the outcome of the
+  // season we are pricing would be exactly the hindsight the pricing refuses.
+  const past = h.totals
+    .filter((t) => t.season < SEASON)
+    .map((t) => ({ season: t.season, mm_x10: t.mm_x10 }));
+
+  const recentDry = past.filter((t) => t.season >= 2011 && t.mm_x10 < strike).length;
+  const firstYear = past[0]?.season;
+  const lastYear = past[past.length - 1]?.season;
+  const driest = past.reduce((a, b) => (b.mm_x10 < a.mm_x10 ? b : a), past[0]!);
 
   return (
     <main>
-      <h1>Rainfall cover, priced by a market</h1>
-      <p className="lede">
-        Ask for cover on one place and one 30-day window. Say the most you will pay and
-        nothing else. Five underwriter agents, each with its own capital and its own read of
-        the history, bid sealed premiums. The lowest bid wins and locks the full payout as
-        collateral. When the window closes, NASA&rsquo;s rainfall record decides — nobody
-        files a claim.
-      </p>
+      <Reveal>
+        <section className="hero">
+          <span className="pill" data-animate>
+            <b>Live</b> on NEAR testnet — three policies settled
+          </span>
+          <h1 className="display" data-animate>
+            Rainfall cover,
+            <br />
+            priced by a market
+          </h1>
+          <p className="lede" data-animate>
+            Assessing a two-hectare farm costs more than the policy is worth, so smallholders
+            cannot buy drought cover. Mmiri removes the assessor: five underwriter agents bid
+            against each other for the risk, and the rainfall record settles it.
+          </p>
+          <div className="btn-row" data-animate>
+            <a className="btn btn-primary" href="#price">
+              Price a risk
+            </a>
+            <a className="btn btn-ghost" href="/simulation">
+              See 15 seasons backtested
+            </a>
+          </div>
+        </section>
 
-      <SiteControls
-        sites={sites().map(({ id, site: x }) => ({
-          id,
-          name: x.name,
-          window: windowLabel(x),
-        }))}
-        siteId={siteId}
-        strike={strike}
-        payout={payoutUsdc}
-        payouts={[...PAYOUTS]}
-      />
+        <section data-animate>
+          <div className="panel">
+            <div className="panel-head">
+              <h3>Rainfall in this window, {firstYear}–{lastYear}</h3>
+              <span className="meta">
+                {s.name} ({s.lat}, {s.lon}) — {windowLabel(s)}
+              </span>
+            </div>
+            <div className="panel-body flush">
+              <RainRecord
+                seasons={past}
+                strike_mm_x10={strike}
+                siteName={`${s.name} (${s.lat}, ${s.lon})`}
+                windowLabel={windowLabel(s)}
+              />
+            </div>
+          </div>
+          <p className="verdict">
+            <strong>
+              {h.all.k} of {h.all.n} seasons
+            </strong>{" "}
+            since {firstYear} fell below {mm(strike)} and would have paid.{" "}
+            {recentDry > 0 ? (
+              <>
+                <strong>
+                  {recentDry} of those {h.all.k}
+                </strong>{" "}
+                happened since 2011.
+              </>
+            ) : null}
+          </p>
+        </section>
+      </Reveal>
 
-      <div className="card">
-        <RainfallHistory
-          // Only seasons that ended before the one being quoted. Showing the outcome of
-          // the season we are pricing would be exactly the hindsight the pricing refuses.
-          seasons={h.totals
-            .filter((t) => t.season < SEASON)
-            .map((t) => ({ season: t.season, mm_x10: t.mm_x10 }))}
-          strike_mm_x10={strike}
-          siteName={`${s.name} (${s.lat}, ${s.lon})`}
-          windowLabel={windowLabel(s)}
+      <div className="band band-tint">
+        <div className="band-inner">
+          <div className="readings cols-4" style={{ borderTop: "none", paddingTop: 0 }}>
+            <div className="reading is-dry">
+              <span className="value">{h.all.k}</span>
+              <span className="label">Seasons that would have paid</span>
+              <span className="note">out of {h.all.n} on record at {s.name}</span>
+            </div>
+            <div className="reading is-wet">
+              <span className="value">{(driest.mm_x10 / 10).toFixed(1)}</span>
+              <span className="label">Driest window, in millimetres</span>
+              <span className="note">{driest.season} — the worst season in the record</span>
+            </div>
+            <div className="reading">
+              <span className="value">5</span>
+              <span className="label">Competing underwriters</span>
+              <span className="note">each with its own capital and its own key</span>
+            </div>
+            <div className="reading">
+              <span className="value">3</span>
+              <span className="label">Policies settled on testnet</span>
+              <span className="note">one of them by a TEE oracle reading NASA directly</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section>
+        <h2>How one round works</h2>
+        <p className="lede">
+          A sealed-bid auction, start to finish, in about two minutes on chain.
+        </p>
+        <div className="steps">
+          {STEPS.map((step) => (
+            <div className="step" key={step.title}>
+              <h3>{step.title}</h3>
+              <p>{step.body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section id="price">
+        <h2>Price a different risk</h2>
+        <p className="lede">
+          Every number below recomputes from the committed rainfall record when you change
+          these.
+        </p>
+
+        <SiteControls
+          sites={sites().map(({ id, site: x }) => ({
+            id,
+            name: x.name,
+            window: windowLabel(x),
+          }))}
+          siteId={siteId}
+          strike={strike}
+          payout={payoutUsdc}
+          payouts={[...PAYOUTS]}
         />
-      </div>
 
-      <h2>Why this needs a market and not a formula</h2>
-      <div className="grid cols-3">
-        <div className="tile">
-          <div className="label">All seasons since 1981</div>
-          <div className="value">{(h.allRate * 100).toFixed(1)}%</div>
-          <div className="note">
-            fell below {mm(strike)} in {h.all.k} of {h.all.n} seasons
+        <div className="panel" style={{ marginTop: "1.5rem" }}>
+          <div className="panel-head">
+            <h3>What the five agents would quote</h3>
+            <span className="meta">
+              {payoutUsdc} USDC payout — {mm(strike)} strike — {windowLabel(s)} {SEASON}
+            </span>
+          </div>
+          <div className="panel-body" style={{ overflowX: "auto" }}>
+            <table>
+              <thead>
+                <tr>
+                  <th>Agent</th>
+                  <th>Its view of the history</th>
+                  <th className="num">Breach rate</th>
+                  <th className="num">Load</th>
+                  <th className="num">Premium</th>
+                  <th className="num">% of payout</th>
+                </tr>
+              </thead>
+              <tbody>
+                {quotes.map(({ st, q }) => (
+                  <tr key={st.id}>
+                    <td>
+                      <strong>
+                        {st.account} {st.label}
+                      </strong>
+                      {q === best?.q ? (
+                        <>
+                          {" "}
+                          <span className="chip" style={{ color: "var(--rain)" }}>
+                            <span className="dot" />
+                            would win
+                          </span>
+                        </>
+                      ) : null}
+                    </td>
+                    <td className="small muted">{st.thesis}</td>
+                    <td className="num">{(q.rate * 100).toFixed(1)}%</td>
+                    <td className="num">{(q.loadBp / 100).toFixed(0)}%</td>
+                    <td className="num">
+                      <strong>{fmtUsdc(q.premium!)}</strong>
+                    </td>
+                    <td className="num">
+                      {((Number(q.premium!) / Number(payout)) * 100).toFixed(1)}%
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
-        <div className="tile">
-          <div className="label">Last 15 seasons</div>
-          <div className="value">{(h.recentRate * 100).toFixed(1)}%</div>
-          <div className="note">
-            fell below {mm(strike)} in {h.recent.k} of {h.recent.n} seasons
-          </div>
-        </div>
-        <div className="tile">
-          <div className="label">The gap</div>
-          <div className="value">
-            {h.allRate > 0 ? `${(h.recentRate / h.allRate).toFixed(2)}×` : "—"}
-          </div>
-          <div className="note">
-            how much more often it has happened lately than across the whole record
-          </div>
-        </div>
-      </div>
-      <p className="small muted" style={{ marginTop: 10 }}>
-        Both numbers are correct. They disagree, and the premium you should charge differs
-        accordingly. No single formula can know which rate is right, because the question —
-        how much does the distant past tell you about next season — is a real open question
-        about a changing climate. So Mmiri does not pick. It runs an auction, and the
-        underwriters that misprice the risk lose their own capital.
-      </p>
 
-      <h2>What the five agents would quote for this risk</h2>
-      <p className="small muted">
-        Computed now, from <span className="mono">agents/pricing</span> — the same library
-        the live agents and the simulation use. A {payoutUsdc} USDC payout, {mm(strike)}{" "}
-        strike, {windowLabel(s)} {SEASON} at {s.name}.
-      </p>
-      <div className="card">
-        <table>
-          <thead>
-            <tr>
-              <th>Agent</th>
-              <th>Its view of the history</th>
-              <th className="num">Breach rate</th>
-              <th className="num">Load</th>
-              <th className="num">Premium</th>
-              <th className="num">% of payout</th>
-            </tr>
-          </thead>
-          <tbody>
-            {quotes.map(({ st, q }) => (
-              <tr key={st.id}>
-                <td>
-                  <strong>
-                    {st.account} {st.label}
-                  </strong>
-                  {q === best?.q ? (
-                    <>
-                      {" "}
-                      <span className="chip">
-                        <span className="dot" style={{ background: "var(--status-good)" }} />
-                        would win
-                      </span>
-                    </>
-                  ) : null}
-                </td>
-                <td className="small muted">{st.thesis}</td>
-                <td className="num">{(q.rate * 100).toFixed(1)}%</td>
-                <td className="num">{(q.loadBp / 100).toFixed(0)}%</td>
-                <td className="num">
-                  <strong>{fmtUsdc(q.premium!)}</strong>
-                </td>
-                <td className="num">
-                  {((Number(q.premium!) / Number(payout)) * 100).toFixed(1)}%
-                </td>
-              </tr>
+        {best && dearest ? (
+          <div className="notice info">
+            At these terms the market clears at{" "}
+            <strong>{fmtUsdc(best.q.premium!)} USDC</strong> —{" "}
+            {((Number(best.q.premium!) / Number(payout)) * 100).toFixed(1)}% of the payout —
+            written by{" "}
+            <strong>
+              {best.st.account} {best.st.label}
+            </strong>
+            . The spread between cheapest and dearest is{" "}
+            {fmtUsdc(dearest.q.premium! - best.q.premium!)} USDC, which is the price of the
+            disagreement below.
+          </div>
+        ) : null}
+      </section>
+
+      <section>
+        <h2>Why this needs a market and not a formula</h2>
+        <div className="readings cols-3">
+          <div className="reading is-wet">
+            <span className="value">{(h.allRate * 100).toFixed(1)}%</span>
+            <span className="label">All seasons since {firstYear}</span>
+            <span className="note">
+              fell below {mm(strike)} in {h.all.k} of {h.all.n} seasons
+            </span>
+          </div>
+          <div className="reading is-dry">
+            <span className="value">{(h.recentRate * 100).toFixed(1)}%</span>
+            <span className="label">Last 15 seasons</span>
+            <span className="note">
+              fell below {mm(strike)} in {h.recent.k} of {h.recent.n} seasons
+            </span>
+          </div>
+          <div className="reading">
+            <span className="value">
+              {h.allRate > 0 ? `${(h.recentRate / h.allRate).toFixed(2)}×` : "—"}
+            </span>
+            <span className="label">The gap</span>
+            <span className="note">
+              how much more often it has happened lately than across the whole record
+            </span>
+          </div>
+        </div>
+        <p className="muted" style={{ marginTop: "1.75rem" }}>
+          Both numbers are correct. They disagree, and the premium you should charge differs
+          accordingly. No single formula can know which rate is right, because the question —
+          how much does the distant past tell you about next season — is a real open question
+          about a changing climate. So Mmiri does not pick. It runs an auction, and the
+          underwriters that misprice the risk lose their own capital.
+        </p>
+      </section>
+
+      <div className="band">
+        <div className="band-inner">
+          <h2>Settled on testnet, not described</h2>
+          <p className="lede">
+            Every one of these is a transaction you can open and a reading you can recompute
+            yourself with <span className="mono">pnpm verify-oracle</span>.
+          </p>
+          <div className="grid cols-3">
+            {SETTLED.map((p) => (
+              <div className="panel" key={p.id}>
+                <div className="panel-head">
+                  <h3>Policy {p.id}</h3>
+                  <span
+                    className="chip"
+                    style={{ color: p.dry ? "var(--dust)" : "var(--rain)" }}
+                  >
+                    <span className="dot" />
+                    {p.outcome}
+                  </span>
+                </div>
+                <div className="panel-body">
+                  <span className="reading">
+                    <span
+                      className="value"
+                      style={{ color: p.dry ? "var(--dust)" : "var(--rain)" }}
+                    >
+                      {p.reading}
+                    </span>
+                  </span>
+                  <p className="small muted" style={{ marginTop: "0.6rem" }}>
+                    {p.detail}. Settled via the {p.source} path.
+                  </p>
+                </div>
+              </div>
             ))}
-          </tbody>
-        </table>
-      </div>
-
-      {best ? (
-        <div className="notice info">
-          At these terms the market would clear at <strong>{fmtUsdc(best.q.premium!)} USDC</strong>{" "}
-          — {((Number(best.q.premium!) / Number(payout)) * 100).toFixed(1)}% of the payout —
-          written by <strong>{best.st.account} {best.st.label}</strong>. The spread between
-          cheapest and dearest here is{" "}
-          {fmtUsdc(quotes[quotes.length - 1]!.q.premium! - best.q.premium!)} USDC, which is
-          the price of the disagreement above.
+          </div>
+          <div className="btn-row">
+            <a className="btn btn-ghost" href={`${EXPLORER}/market.mmiri-demo.testnet`}>
+              Open the market contract
+            </a>
+          </div>
         </div>
-      ) : null}
+      </div>
 
       {!contractConfigured() ? (
         <div className="notice">
-          <strong>No contract is configured for this deployment</strong>, so there is nothing
-          to sign here yet. Everything above is computed from the committed rainfall fixture
-          and the real pricing library, and the read-only pages work without a wallet. Set{" "}
-          <span className="mono">NEXT_PUBLIC_MARKET_ID</span> to point the app at a deployed
-          market.
+          <strong>This build has no contract configured</strong>, so there is nothing to sign
+          here. Everything above is computed from the committed rainfall fixture and the real
+          pricing library. Set <span className="mono">NEXT_PUBLIC_MARKET_ID</span> to point it
+          at the deployed market.
         </div>
       ) : (
         <div className="notice info">
           Connected to <span className="mono">{MARKET_ID}</span>. Opening a round means a
-          NEP-141 <span className="mono">ft_transfer_call</span> carrying your maximum
-          premium — see <a href="/rounds">rounds</a>.
+          NEP-141 <span className="mono">ft_transfer_call</span> carrying your maximum premium
+          — see <a href="/rounds">rounds</a>.
         </div>
       )}
 
@@ -206,8 +407,8 @@ export default async function Home({
         Rainfall is NASA POWER <span className="mono">PRECTOTCORR</span> (Precipitation
         Corrected), daily, <span className="mono">community=AG</span>. Totals are computed in
         integers and rounded once, so every implementation agrees. One grid cell is roughly
-        56 × 69 km near Enugu — rain on the cell is not rain on your farm, and that basis
-        risk is inherent to index insurance.
+        56 × 69 km near Enugu — rain on the cell is not rain on your farm, and that basis risk
+        is inherent to index insurance.
       </div>
     </main>
   );

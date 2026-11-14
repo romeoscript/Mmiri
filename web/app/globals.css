@@ -1,69 +1,83 @@
 /*
  * Mmiri — one stylesheet, no framework.
  *
- * Colours are the validated default data-viz palette. The chart roles were checked with
- * the palette validator in both modes before being written down here: series blue against
- * status critical measures CVD ΔE 23.8 light / 25.7 dark and normal-vision 31.6 / 31.9,
- * well clear of the 8 and 15 floors.
+ * The palette is the data encoding, not decoration. Mmiri is Igbo for water, and the
+ * whole product turns on two states: a window that stayed wet, and one that went dry.
+ * So rain is water-blue, drought is harmattan ochre, and those two hues are never used
+ * for anything else — no "accent" buttons in the payout colour, no decorative gradients.
+ * If something on this page is ochre, a policy paid.
  *
- * Dark mode is declared twice on purpose: the media query covers the OS setting, the
- * [data-theme] scope covers an explicit choice, and the :not() guard lets an explicit
- * light setting beat OS dark.
+ * The base is a saturated blue-green ink rather than a tinted black: it is the colour of
+ * deep water, and it keeps the blue series from reading as the only hue on the page.
+ *
+ * Type is one family, Archivo, used at two widths. Expanded carries display and data;
+ * normal width carries prose. One family with a width axis holds together better than
+ * two unrelated faces, and the width change is doing real work — it marks the difference
+ * between a number you are meant to read and a sentence you are meant to follow.
+ *
+ * Light mode keeps the same hues with the accents darkened for contrast on paper.
  */
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 
-  --page: #f9f9f7;
-  --surface-1: #fcfcfb;
-  --text-primary: #0b0b0b;
-  --text-secondary: #52514e;
-  --text-muted: #898781;
-  --grid: #e1e0d9;
-  --axis: #c3c2b7;
-  --border: rgba(11, 11, 11, 0.1);
+  --ink: #08191f;
+  --ink-2: #0e2a32;
+  --ink-3: #14393f;
+  --paper: #e8f2f1;
+  --silt: #7d9aa1;
+  --silt-dim: #5c767d;
 
-  /* Chart roles */
-  --series-1: #2a78d6;
-  --status-critical: #d03b3b;
-  --status-good: #0ca30c;
-  --status-warning: #fab219;
-  --status-serious: #ec835a;
-  --success-text: #006300;
+  /* The two states. Nothing else may use these. */
+  --rain: #6fc9de;
+  --dust: #e3a33c;
 
-  --radius: 10px;
+  --rule: rgba(232, 242, 241, 0.14);
+  --rule-strong: rgba(232, 242, 241, 0.3);
+
+  --good: #4ec98a;
+  --bad: #ef7a6d;
+
   --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-  --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sans: var(--font-archivo), system-ui, -apple-system, sans-serif;
+
+  --measure: 66ch;
+  --gutter: clamp(1rem, 4vw, 2.5rem);
+  --rhythm: clamp(3rem, 7vw, 5.5rem);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:where(:not([data-theme="light"])) {
-    color-scheme: dark;
-    --page: #0d0d0d;
-    --surface-1: #1a1a19;
-    --text-primary: #f0efec;
-    --text-secondary: #c3c2b7;
-    --text-muted: #898781;
-    --grid: #2c2c2a;
-    --axis: #383835;
-    --border: rgba(255, 255, 255, 0.1);
-    --series-1: #3987e5;
-    --success-text: #0ca30c;
+@media (prefers-color-scheme: light) {
+  :root:where(:not([data-theme="dark"])) {
+    color-scheme: light;
+    --ink: #f4f8f7;
+    --ink-2: #ffffff;
+    --ink-3: #e7eeed;
+    --paper: #08191f;
+    --silt: #52686d;
+    --silt-dim: #74888c;
+    --rain: #0e7c94;
+    --dust: #8a5806;
+    --rule: rgba(8, 25, 31, 0.14);
+    --rule-strong: rgba(8, 25, 31, 0.32);
+    --good: #0a7a46;
+    --bad: #b03024;
   }
 }
 
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --page: #0d0d0d;
-  --surface-1: #1a1a19;
-  --text-primary: #f0efec;
-  --text-secondary: #c3c2b7;
-  --text-muted: #898781;
-  --grid: #2c2c2a;
-  --axis: #383835;
-  --border: rgba(255, 255, 255, 0.1);
-  --series-1: #3987e5;
-  --success-text: #0ca30c;
+:root[data-theme="light"] {
+  color-scheme: light;
+  --ink: #f4f8f7;
+  --ink-2: #ffffff;
+  --ink-3: #e7eeed;
+  --paper: #08191f;
+  --silt: #52686d;
+  --silt-dim: #74888c;
+  --rain: #0e7c94;
+  --dust: #8a5806;
+  --rule: rgba(8, 25, 31, 0.14);
+  --rule-strong: rgba(8, 25, 31, 0.32);
+  --good: #0a7a46;
+  --bad: #b03024;
 }
 
 * {
@@ -75,105 +89,241 @@ body {
   margin: 0;
   padding: 0;
   max-width: 100%;
+  overflow-x: hidden;
 }
 
 body {
-  background: var(--page);
-  color: var(--text-primary);
+  background: var(--ink);
+  color: var(--paper);
   font-family: var(--sans);
-  font-size: 15px;
-  line-height: 1.55;
+  font-size: 1rem;
+  line-height: 1.6;
+  font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
 }
 
 a {
-  color: var(--series-1);
-  text-decoration: none;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--rule-strong);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 160ms ease;
 }
 a:hover {
-  text-decoration: underline;
+  text-decoration-color: currentColor;
 }
 
-/* ---------------- layout ---------------- */
-
-.shell {
-  max-width: 1040px;
-  margin: 0 auto;
-  padding: 0 16px 72px;
+:where(a, button, select, input, [tabindex]):focus-visible {
+  outline: 2px solid var(--rain);
+  outline-offset: 3px;
+  border-radius: 2px;
 }
+
+/* ---------------- masthead ---------------- */
 
 header.top {
-  border-bottom: 1px solid var(--border);
-  background: var(--surface-1);
-  margin-bottom: 28px;
+  border-bottom: 1px solid var(--rule);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: color-mix(in srgb, var(--ink) 88%, transparent);
+  backdrop-filter: blur(10px);
 }
 header.top .inner {
-  max-width: 1040px;
+  max-width: 1180px;
   margin: 0 auto;
-  padding: 14px 16px;
+  padding: 0.85rem var(--gutter);
   display: flex;
-  align-items: baseline;
-  gap: 20px;
+  align-items: center;
+  gap: clamp(1rem, 3vw, 2.5rem);
   flex-wrap: wrap;
 }
 .brand {
-  font-weight: 650;
-  font-size: 17px;
-  letter-spacing: -0.01em;
-  color: var(--text-primary);
+  font-stretch: 125%;
+  font-weight: 700;
+  font-size: 1.0625rem;
+  letter-spacing: 0.01em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
 }
-.brand span {
+/* A rain gauge, two marks and a fill. The one piece of ornament on the page, and it is
+   the instrument the whole product depends on. */
+.brand .gauge {
+  width: 10px;
+  height: 22px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+  flex: none;
+}
+.brand .gauge::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 38%;
+  background: var(--rain);
+}
+.brand em {
+  font-stretch: 100%;
+  font-style: normal;
   font-weight: 400;
-  color: var(--text-muted);
-  font-size: 13px;
-  margin-left: 8px;
+  font-size: 0.8125rem;
+  color: var(--silt);
+  letter-spacing: 0;
 }
 nav.main {
   display: flex;
-  gap: 16px;
+  gap: clamp(0.75rem, 2vw, 1.5rem);
   flex-wrap: wrap;
-  font-size: 14px;
+  font-size: 0.875rem;
+  margin-left: auto;
 }
 nav.main a {
-  color: var(--text-secondary);
+  color: var(--silt);
+  text-decoration: none;
+  padding-bottom: 2px;
+  border-bottom: 1px solid transparent;
+}
+nav.main a:hover {
+  color: var(--paper);
 }
 nav.main a[aria-current="page"] {
-  color: var(--text-primary);
-  font-weight: 600;
+  color: var(--paper);
+  border-bottom-color: var(--rain);
 }
 
-h1 {
-  font-size: 26px;
-  line-height: 1.2;
+/* ---------------- shell + rhythm ---------------- */
+
+.shell {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 var(--gutter) 6rem;
+}
+
+section {
+  margin-top: var(--rhythm);
+}
+
+/* ---------------- type ---------------- */
+
+h1,
+h2,
+h3,
+.display {
+  font-stretch: 125%;
   letter-spacing: -0.015em;
-  margin: 24px 0 6px;
+  line-height: 1.05;
+  text-wrap: balance;
+  margin: 0;
+}
+
+.display {
+  font-size: clamp(2.75rem, 7vw, 5.25rem);
+  font-weight: 700;
+}
+h1 {
+  font-size: clamp(2rem, 4.5vw, 3rem);
+  font-weight: 700;
 }
 h2 {
-  font-size: 18px;
-  margin: 32px 0 10px;
-  letter-spacing: -0.01em;
+  font-size: clamp(1.4rem, 2.6vw, 1.9rem);
+  font-weight: 650;
+  margin-bottom: 0.75rem;
 }
 h3 {
-  font-size: 15px;
-  margin: 20px 0 8px;
-}
-p.lede {
-  color: var(--text-secondary);
-  margin: 0 0 20px;
-  max-width: 68ch;
-}
-p {
-  max-width: 72ch;
+  font-size: 1.0625rem;
+  font-weight: 650;
+  margin-bottom: 0.4rem;
 }
 
+p {
+  max-width: var(--measure);
+  margin: 0 0 1rem;
+}
+p.lede {
+  font-size: clamp(1.0625rem, 1.6vw, 1.1875rem);
+  color: var(--silt);
+  max-width: 58ch;
+}
+.small {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+.muted {
+  color: var(--silt);
+}
+.mono {
+  font-family: var(--mono);
+  font-size: 0.85em;
+  color: var(--silt);
+}
+
+/* ---------------- readings (replaces boxed stat tiles) ----------------
+   Numbers sit on an open page under a hairline, not inside identical boxes. The rule
+   plus the width change is enough structure; a border around each one added nothing. */
+
+.readings {
+  display: grid;
+  gap: clamp(1.25rem, 3vw, 2.5rem);
+  border-top: 1px solid var(--rule-strong);
+  padding-top: 1.25rem;
+}
+@media (min-width: 700px) {
+  .readings.cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .readings.cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .readings.cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+.reading .value {
+  font-stretch: 125%;
+  font-weight: 700;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  display: block;
+}
+/* These are spans so a reading can sit inside flow content, which means `display` has to
+   be set explicitly — left inline they run into each other and the label swallows the
+   note. */
+.reading .label {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--paper);
+  margin-top: 0.5rem;
+  font-weight: 500;
+}
+.reading .note {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--silt);
+  margin-top: 0.2rem;
+  max-width: 34ch;
+  line-height: 1.45;
+}
+.reading.is-dry .value {
+  color: var(--dust);
+}
+.reading.is-wet .value {
+  color: var(--rain);
+}
+
+/* ---------------- panels ----------------
+   Used only where content genuinely needs containing — a wide table, a form. Not as a
+   default wrapper for every paragraph. */
+
 .card {
-  background: var(--surface-1);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 18px 20px;
-  margin: 16px 0;
-  /* Wide tables scroll inside their own card rather than pushing the page sideways.
-     A phone-width reviewer should never meet a horizontal page scrollbar. */
+  background: var(--ink-2);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: clamp(1rem, 2.5vw, 1.5rem);
+  margin: 1.25rem 0;
   overflow-x: auto;
 }
 .card > h2:first-child,
@@ -183,7 +333,7 @@ p {
 
 .grid {
   display: grid;
-  gap: 14px;
+  gap: 1rem;
 }
 @media (min-width: 720px) {
   .grid.cols-2 {
@@ -197,30 +347,29 @@ p {
   }
 }
 
-/* ---------------- stat tiles ---------------- */
-
+/* A tile is a reading that happens to sit in a grid. Same treatment: a number on the
+   page under a hairline, not a box. Boxing each one added a border and a background to
+   say something the spacing already said. */
 .tile {
-  background: var(--surface-1);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px 16px;
+  border-top: 1px solid var(--rule-strong);
+  padding: 0.9rem 0 0;
 }
 .tile .label {
-  font-size: 12px;
-  color: var(--text-muted);
-  text-transform: none;
-  margin-bottom: 4px;
+  font-size: 0.8125rem;
+  color: var(--silt);
+  margin-bottom: 0.3rem;
 }
 .tile .value {
-  font-size: 24px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
+  font-stretch: 125%;
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
 }
 .tile .note {
-  font-size: 12px;
-  color: var(--text-secondary);
-  margin-top: 4px;
+  font-size: 0.8125rem;
+  color: var(--silt);
+  margin-top: 0.3rem;
 }
 
 /* ---------------- tables ---------------- */
@@ -228,24 +377,22 @@ p {
 table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: 0.9375rem;
 }
 th {
   text-align: left;
-  font-weight: 600;
-  color: var(--text-secondary);
-  font-size: 12px;
-  padding: 6px 14px 6px 0;
-  border-bottom: 1px solid var(--axis);
+  font-weight: 500;
+  font-size: 0.8125rem;
+  color: var(--silt);
+  padding: 0 1rem 0.6rem 0;
+  border-bottom: 1px solid var(--rule-strong);
   white-space: nowrap;
 }
 td {
-  padding: 7px 14px 7px 0;
-  border-bottom: 1px solid var(--grid);
+  padding: 0.7rem 1rem 0.7rem 0;
+  border-bottom: 1px solid var(--rule);
   vertical-align: top;
 }
-/* Every cell keeps a right gutter; only the last one in a row gives it up. Without
-   this, a right-aligned numeric column runs straight into the next column's text. */
 th:last-child,
 td:last-child {
   padding-right: 0;
@@ -255,12 +402,18 @@ th.num {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
+tbody tr {
+  transition: background-color 140ms ease;
+}
+tbody tr:hover {
+  background: color-mix(in srgb, var(--paper) 4%, transparent);
+}
 tr:last-child td {
   border-bottom: none;
 }
-.mono {
-  font-family: var(--mono);
-  font-size: 12.5px;
+td strong {
+  font-stretch: 112%;
+  font-weight: 650;
 }
 
 /* ---------------- chips ---------------- */
@@ -268,18 +421,20 @@ tr:last-child td {
 .chip {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  font-size: 12px;
+  gap: 0.35rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  padding: 2px 9px;
+  padding: 0.1rem 0.55rem;
   border-radius: 999px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--rule-strong);
   white-space: nowrap;
+  vertical-align: middle;
 }
 .chip .dot {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
+  background: currentColor;
 }
 
 /* ---------------- charts ---------------- */
@@ -294,27 +449,28 @@ tr:last-child td {
   overflow: visible;
 }
 .chart-title {
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 2px;
+  font-stretch: 112%;
+  font-size: 1rem;
+  font-weight: 650;
+  margin-bottom: 0.15rem;
 }
 .chart-sub {
-  font-size: 12.5px;
-  color: var(--text-secondary);
-  margin-bottom: 10px;
+  font-size: 0.8125rem;
+  color: var(--silt);
+  margin-bottom: 0.9rem;
 }
 .legend {
   display: flex;
-  gap: 16px;
+  gap: 1.25rem;
   flex-wrap: wrap;
-  font-size: 12.5px;
-  color: var(--text-secondary);
-  margin-top: 10px;
+  font-size: 0.8125rem;
+  color: var(--silt);
+  margin-top: 0.9rem;
 }
 .legend .item {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 0.4rem;
 }
 .legend .swatch {
   width: 10px;
@@ -325,98 +481,420 @@ tr:last-child td {
 .tip {
   position: absolute;
   pointer-events: none;
-  background: var(--surface-1);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 7px 10px;
-  font-size: 12.5px;
+  background: var(--ink-3);
+  border: 1px solid var(--rule-strong);
+  border-radius: 4px;
+  padding: 0.45rem 0.6rem;
+  font-size: 0.8125rem;
   line-height: 1.4;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
   z-index: 5;
   white-space: nowrap;
   transform: translate(-50%, -100%);
+  color: var(--paper);
 }
 .tip .k {
-  color: var(--text-muted);
-}
-.tip b {
-  font-variant-numeric: tabular-nums;
+  color: var(--silt);
 }
 
 /* ---------------- forms ---------------- */
 
 label.field {
   display: block;
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-bottom: 4px;
+  font-size: 0.8125rem;
+  color: var(--silt);
+  margin-bottom: 0.3rem;
 }
 select,
 input[type="number"],
 input[type="text"] {
   font: inherit;
-  font-size: 14px;
-  padding: 7px 9px;
-  border-radius: 8px;
-  border: 1px solid var(--axis);
-  background: var(--surface-1);
-  color: var(--text-primary);
+  font-size: 0.9375rem;
+  padding: 0.55rem 0.6rem;
+  border-radius: 3px;
+  border: 1px solid var(--rule-strong);
+  background: var(--ink-2);
+  color: var(--paper);
   width: 100%;
 }
 button {
   font: inherit;
-  font-size: 14px;
+  font-size: 0.9375rem;
   font-weight: 600;
-  padding: 8px 14px;
-  border-radius: 8px;
-  border: 1px solid transparent;
-  background: var(--series-1);
-  color: #ffffff;
+  padding: 0.55rem 1rem;
+  border-radius: 3px;
+  border: 1px solid var(--paper);
+  background: var(--paper);
+  color: var(--ink);
   cursor: pointer;
+  transition: opacity 140ms ease;
 }
 button:hover {
-  filter: brightness(1.06);
+  opacity: 0.85;
 }
 button:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
-  filter: none;
 }
 button.secondary {
-  background: var(--surface-1);
-  color: var(--text-primary);
-  border-color: var(--axis);
+  background: transparent;
+  color: var(--paper);
+  border-color: var(--rule-strong);
 }
 
 /* ---------------- notices ---------------- */
 
 .notice {
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--status-warning);
-  background: var(--surface-1);
-  border-radius: 8px;
-  padding: 12px 14px;
-  font-size: 13.5px;
-  color: var(--text-secondary);
-  margin: 14px 0;
+  border-left: 2px solid var(--dust);
+  padding: 0.1rem 0 0.1rem 1rem;
+  font-size: 0.9375rem;
+  color: var(--silt);
+  margin: 1.25rem 0;
+  max-width: var(--measure);
 }
 .notice strong {
-  color: var(--text-primary);
+  color: var(--paper);
+  font-weight: 600;
 }
 .notice.info {
-  border-left-color: var(--series-1);
+  border-left-color: var(--rain);
 }
 
-.muted {
-  color: var(--text-muted);
-}
-.small {
-  font-size: 12.5px;
-}
 .footnote {
-  font-size: 12.5px;
-  color: var(--text-muted);
-  margin-top: 28px;
-  border-top: 1px solid var(--border);
-  padding-top: 14px;
+  font-size: 0.8125rem;
+  color: var(--silt-dim);
+  margin-top: var(--rhythm);
+  border-top: 1px solid var(--rule);
+  padding-top: 1rem;
+  max-width: var(--measure);
+}
+
+/* ---------------- logo ---------------- */
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--paper);
+}
+.logo svg {
+  flex: none;
+}
+.logo-word {
+  font-stretch: 125%;
+  font-weight: 700;
+  font-size: 1.1875rem;
+  letter-spacing: -0.01em;
+}
+
+.cta-sm {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  text-decoration: none;
+  color: var(--paper);
+  white-space: nowrap;
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+.cta-sm::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--good);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--good) 22%, transparent);
+}
+.cta-sm:hover {
+  border-color: var(--paper);
+  background: color-mix(in srgb, var(--paper) 7%, transparent);
+}
+
+/* ---------------- buttons ---------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 650;
+  font-size: 0.9375rem;
+  padding: 0.7rem 1.3rem;
+  border-radius: 999px;
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease;
+}
+.btn-primary {
+  background: var(--rain);
+  color: #04141a;
+  border-color: var(--rain);
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--rain) 86%, white);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--paper);
+  border-color: var(--rule-strong);
+}
+.btn-ghost:hover {
+  transform: translateY(-1px);
+  border-color: var(--paper);
+}
+.btn-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+}
+
+/* ---------------- bands ----------------
+   Full-bleed sections. The shell is a narrow column, so a band has to escape it to put
+   a different ground under a different kind of content. */
+
+.band {
+  width: 100vw;
+  margin-left: 50%;
+  transform: translateX(-50%);
+  padding: clamp(2.5rem, 6vw, 4.5rem) var(--gutter);
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+.band-tint {
+  background: var(--ink-2);
+}
+.band > .band-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+/* ---------------- hero ---------------- */
+
+.hero {
+  position: relative;
+  padding: clamp(3rem, 9vw, 6.5rem) 0 clamp(2rem, 4vw, 3rem);
+}
+/* The weather over the page: one soft front of water light behind the headline. It is
+   the only gradient on the site and it is doing a job — separating the opening from the
+   data below it without drawing a box around either. */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: -18% -40% auto -10%;
+  height: 90%;
+  background: radial-gradient(
+    60% 60% at 25% 35%,
+    color-mix(in srgb, var(--rain) 20%, transparent) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: -1;
+}
+.hero .display {
+  margin-bottom: clamp(1rem, 2vw, 1.5rem);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--rule-strong);
+  color: var(--silt);
+  margin-bottom: 1.5rem;
+}
+.pill b {
+  color: var(--paper);
+  font-weight: 650;
+}
+
+/* ---------------- panels ----------------
+   A panel is a framed instrument: a titled strip, then the reading. Used for the things
+   that genuinely are instruments — the record, the quotes — and nothing else. */
+
+.panel {
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  background: var(--ink-2);
+  overflow: hidden;
+}
+.panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.85rem clamp(1rem, 2.5vw, 1.5rem);
+  border-bottom: 1px solid var(--rule);
+  background: color-mix(in srgb, var(--paper) 3%, transparent);
+}
+.panel-head h3 {
+  margin: 0;
+  font-size: 0.9375rem;
+}
+.panel-head .meta {
+  font-size: 0.8125rem;
+  color: var(--silt);
+}
+.panel-body {
+  padding: clamp(1rem, 2.5vw, 1.75rem);
+}
+.panel-body.flush {
+  padding: clamp(1rem, 2.5vw, 1.75rem) clamp(0.5rem, 1.5vw, 1rem);
+}
+
+/* ---------------- steps ----------------
+   Numbered because this genuinely is a sequence: each step cannot happen before the one
+   above it closed. */
+
+.steps {
+  display: grid;
+  gap: 1.5rem;
+  counter-reset: step;
+}
+@media (min-width: 860px) {
+  .steps {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1.25rem;
+  }
+}
+.step {
+  counter-increment: step;
+  border-top: 2px solid var(--rule-strong);
+  padding-top: 0.9rem;
+  transition: border-color 220ms ease;
+}
+.step:hover {
+  border-top-color: var(--rain);
+}
+.step::before {
+  content: counter(step);
+  font-stretch: 125%;
+  font-weight: 700;
+  font-size: 0.8125rem;
+  color: var(--rain);
+  display: block;
+  margin-bottom: 0.35rem;
+}
+.step h3 {
+  font-size: 0.9375rem;
+  margin-bottom: 0.3rem;
+}
+.step p {
+  font-size: 0.8125rem;
+  color: var(--silt);
+  margin: 0;
+  max-width: none;
+}
+
+/* ---------------- footer ---------------- */
+
+.site-foot {
+  border-top: 1px solid var(--rule);
+  background: var(--ink-2);
+  padding: clamp(2.5rem, 5vw, 4rem) var(--gutter) 1.5rem;
+}
+.site-foot .inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: grid;
+  gap: 2.5rem;
+}
+@media (min-width: 760px) {
+  .site-foot .inner {
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 3rem;
+  }
+}
+.foot-brand p {
+  margin: 0.9rem 0 0;
+  max-width: 38ch;
+}
+.foot-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+.foot-col h3 {
+  font-size: 0.8125rem;
+  color: var(--silt);
+  font-weight: 500;
+  font-stretch: 100%;
+  margin-bottom: 0.25rem;
+}
+.foot-col a {
+  font-size: 0.9375rem;
+  text-decoration: none;
+  color: var(--paper);
+}
+.foot-col a:hover {
+  color: var(--rain);
+}
+.foot-note {
+  max-width: 1180px;
+  margin: clamp(2rem, 4vw, 3rem) auto 0;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  font-size: 0.8125rem;
+  color: var(--silt);
+}
+
+.rain-record {
+  margin: 0;
+}
+/* Year ticks scale with the viewBox, so below tablet width they would render at a size
+   nobody can read. The shape carries the point on a phone; the years do not. */
+@media (max-width: 700px) {
+  .rain-record .yr {
+    display: none;
+  }
+}
+
+.verdict {
+  font-size: clamp(1.0625rem, 2.1vw, 1.375rem);
+  line-height: 1.5;
+  max-width: 60ch;
+  margin: clamp(1.25rem, 3vw, 2rem) 0 0;
+  color: var(--paper);
+}
+.verdict strong {
+  font-stretch: 125%;
+  font-weight: 700;
+}
+
+/* ---------------- motion ----------------
+   Elements the load sequence animates start hidden ONLY when the script will run. If
+   JavaScript never arrives, or the visitor asked for less motion, they must render in
+   their final state rather than stay invisible. */
+
+html[data-motion] [data-animate] {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-motion] [data-animate] {
+    opacity: 1;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }
