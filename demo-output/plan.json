@@ -1,0 +1,140 @@
+{
+ "beats": {
+  "b1": 2.6,
+  "b2": 17.11,
+  "b3": 33.78,
+  "b4": 43.05,
+  "b5": 52.8,
+  "b6": 75.26,
+  "b7": 91.93,
+  "bT": 114.97,
+  "bT2": 139.17,
+  "b8": 150.57,
+  "b9": 178.28
+ },
+ "timeline": [
+  {
+   "id": "b1",
+   "clip": "s1",
+   "gap": 0.9,
+   "label": "The farmer",
+   "start": 2.6,
+   "dur": 13.61,
+   "end": 16.21
+  },
+  {
+   "id": "b2",
+   "clip": "s2",
+   "gap": 0.9,
+   "label": "45 seasons of rainfall",
+   "start": 17.11,
+   "dur": 15.77,
+   "end": 32.88
+  },
+  {
+   "id": "b3",
+   "clip": "s3",
+   "gap": 0.8,
+   "label": "Her terms",
+   "start": 33.78,
+   "dur": 8.47,
+   "end": 42.25
+  },
+  {
+   "id": "b4",
+   "clip": "s9",
+   "gap": 1.2,
+   "label": "Her own wallet",
+   "start": 43.05,
+   "dur": 8.55,
+   "end": 51.6
+  },
+  {
+   "id": "b5",
+   "clip": "s4",
+   "gap": 1,
+   "label": "Five sealed bids",
+   "start": 52.8,
+   "dur": 21.46,
+   "end": 74.26
+  },
+  {
+   "id": "b6",
+   "clip": "s5",
+   "gap": 0.9,
+   "label": "Why a market",
+   "start": 75.26,
+   "dur": 15.77,
+   "end": 91.03
+  },
+  {
+   "id": "b7",
+   "clip": "s7",
+   "gap": 2.8,
+   "label": "Settlement",
+   "start": 91.93,
+   "dur": 20.25,
+   "end": 112.17
+  },
+  {
+   "id": "bT",
+   "clip": "s10",
+   "gap": 4,
+   "label": "A round, start to finish",
+   "start": 114.97,
+   "dur": 20.2,
+   "end": 135.17
+  },
+  {
+   "id": "bT2",
+   "clip": "s11",
+   "gap": 3.2,
+   "label": "Settled — no claim filed",
+   "start": 139.17,
+   "dur": 8.19,
+   "end": 147.37
+  },
+  {
+   "id": "b8",
+   "clip": "s6",
+   "gap": 2.8,
+   "label": "15 seasons backtested",
+   "start": 150.57,
+   "dur": 24.92,
+   "end": 175.48
+  },
+  {
+   "id": "b9",
+   "clip": "s8",
+   "gap": 0,
+   "label": "Live on NEAR testnet",
+   "start": 178.28,
+   "dur": 15.94,
+   "end": 194.22
+  }
+ ],
+ "takes": {
+  "A": {
+   "from": 0,
+   "to": 114.57,
+   "url": "/"
+  },
+  "T": {
+   "from": 114.57,
+   "to": 150.17
+  },
+  "B": {
+   "from": 150.17,
+   "to": 177.88,
+   "url": "/"
+  },
+  "C": {
+   "from": 177.88,
+   "to": 197.42,
+   "url": "/policies"
+  }
+ },
+ "lead": 2.6,
+ "tail": 3.2,
+ "total": 197.42
+}

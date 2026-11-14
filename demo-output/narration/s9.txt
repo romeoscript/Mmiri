@@ -1,0 +1,1 @@
+She signs the request with her own NEAR wallet. No intermediary holds her money: the contract escrows her maximum until the round clears.

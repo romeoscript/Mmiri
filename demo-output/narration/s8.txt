@@ -1,0 +1,1 @@
+It is live on NEAR testnet: four policies, three paid out, one of them settled by a worker inside a trusted enclave, reading NASA directly. The contracts, the agents and the simulation are all in the repository, and the tests run from a clean clone.

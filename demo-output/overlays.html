@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8" />
+<style>
+@font-face { font-family:'ArchivoExp'; src:url('assets/fonts/archivo-exp-700.woff2') format('woff2'); font-weight:700; font-display:block; }
+@font-face { font-family:'ArchivoBody'; src:url('assets/fonts/archivo-500.woff2') format('woff2'); font-weight:500; font-display:block; }
+* { box-sizing:border-box; margin:0; }
+body { background:transparent; font-family:'ArchivoBody',sans-serif; color:#e8f2f1; }
+.card { position:relative; width:1920px; height:1080px; display:flex; flex-direction:column; justify-content:center; padding:0 150px; }
+.card.open { background:linear-gradient(90deg, rgba(8,25,31,.90) 0%, rgba(8,25,31,.86) 46%, rgba(8,25,31,.68) 76%, rgba(8,25,31,.54) 100%); }
+.card.close { background:rgba(8,25,31,.86); }
+.mark { display:flex; align-items:center; gap:22px; margin-bottom:42px; }
+.mark svg { width:60px; height:60px; display:block; }
+.mark-name { font-family:'ArchivoExp',sans-serif; font-size:56px; letter-spacing:.01em; }
+h1 { font-family:'ArchivoExp',sans-serif; font-weight:700; font-size:92px; line-height:1.05; margin:0 0 34px; max-width:1240px; }
+.card.close h1 { font-size:84px; max-width:1300px; }
+p { font-size:38px; line-height:1.45; margin:0; max-width:1120px; color:#c7dbdd; }
+.meta { margin-top:50px; font-size:31px; color:#94afb6; letter-spacing:.01em; }
+.meta b { color:#6fc9de; font-weight:500; }
+.repo { margin-top:40px; font-size:40px; color:#e8f2f1; }
+.chip { display:inline-flex; align-items:center; gap:18px; padding:17px 34px 17px 28px;
+  background:rgba(8,25,31,.90); border:1px solid rgba(148,175,182,.30); border-radius:999px; }
+.rule { width:34px; height:3px; background:#6fc9de; border-radius:2px; flex:none; }
+.chip-text { font-size:32px; line-height:1; white-space:nowrap; }
+.row { padding:8px 0; }
+</style></head>
+<body>
+<div class="card open" id="open">
+  <div class="mark"><svg viewBox="0 0 32 32"><path d="M16 2C16 2 5 14.4 5 20.6 5 26.3 9.9 31 16 31s11-4.7 11-10.4C27 14.4 16 2 16 2z" fill="none" stroke="#6fc9de" stroke-width="2"/><path d="M8.2 19.8h15.6c.4 2.2-.2 4.4-1.8 6.2-1.7 1.9-4 2.9-6.3 2.9-4.3 0-7.7-3.3-7.5-9.1z" fill="#e3a33c"/></svg><span class="mark-name">Mmiri</span></div>
+  <h1>Rainfall cover,<br />priced by a market</h1>
+  <p>Index insurance for smallholder farmers — auctioned between underwriter agents, settled from NASA's rainfall record.</p>
+  <div class="meta">Live on <b>NEAR testnet</b> · market.mmiri-demo.testnet</div>
+</div>
+<div class="card close" id="close">
+  <div class="mark"><svg viewBox="0 0 32 32"><path d="M16 2C16 2 5 14.4 5 20.6 5 26.3 9.9 31 16 31s11-4.7 11-10.4C27 14.4 16 2 16 2z" fill="none" stroke="#6fc9de" stroke-width="2"/><path d="M8.2 19.8h15.6c.4 2.2-.2 4.4-1.8 6.2-1.7 1.9-4 2.9-6.3 2.9-4.3 0-7.7-3.3-7.5-9.1z" fill="#e3a33c"/></svg><span class="mark-name">Mmiri</span></div>
+  <h1>Nobody files a claim.</h1>
+  <p>The contracts, the five agents, the TEE oracle and the backtest all run from a clean clone.</p>
+  <div class="repo">github.com/romeoscript/Mmiri</div>
+  <div class="meta">Built at <b>NEAR HACKATHON</b></div>
+</div>
+<div class="row"><span class="chip" id="chip-0"><span class="rule"></span><span class="chip-text">The farmer</span></span></div>
+<div class="row"><span class="chip" id="chip-1"><span class="rule"></span><span class="chip-text">45 seasons of rainfall</span></span></div>
+<div class="row"><span class="chip" id="chip-2"><span class="rule"></span><span class="chip-text">Her terms</span></span></div>
+<div class="row"><span class="chip" id="chip-3"><span class="rule"></span><span class="chip-text">Her own wallet</span></span></div>
+<div class="row"><span class="chip" id="chip-4"><span class="rule"></span><span class="chip-text">Five sealed bids</span></span></div>
+<div class="row"><span class="chip" id="chip-5"><span class="rule"></span><span class="chip-text">Why a market</span></span></div>
+<div class="row"><span class="chip" id="chip-6"><span class="rule"></span><span class="chip-text">Settlement</span></span></div>
+<div class="row"><span class="chip" id="chip-7"><span class="rule"></span><span class="chip-text">A round, start to finish</span></span></div>
+<div class="row"><span class="chip" id="chip-8"><span class="rule"></span><span class="chip-text">Settled — no claim filed</span></span></div>
+<div class="row"><span class="chip" id="chip-9"><span class="rule"></span><span class="chip-text">15 seasons backtested</span></span></div>
+<div class="row"><span class="chip" id="chip-10"><span class="rule"></span><span class="chip-text">Live on NEAR testnet</span></span></div>
+</body></html>

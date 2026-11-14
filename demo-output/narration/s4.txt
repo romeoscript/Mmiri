@@ -1,0 +1,1 @@
+Five underwriters answer, each a NEAR account with its own capital and its own read of the history. Each bids a sealed premium: the contract sees only a hash until the reveal, so nobody can undercut a rival by a cent. The lowest bid wins, and it locks the entire payout as collateral. Here it clears at twelve dollars seventy seven, for fifty dollars of cover.

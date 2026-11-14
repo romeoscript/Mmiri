@@ -1,5 +1,13 @@
 # Mmiri — the 100-second demo
 
+> **The demo has been recorded: `demo-output/mmiri-demo.mp4`** — 3:17, 1920×1080, narrated, and
+> recorded against the live testnet deployment rather than reconstructed from screenshots. It
+> includes a full round running on chain — round 11, opened, bid, revealed, finalized and
+> settled while the film was being made.
+> `demo-output/README.md` says what each beat claims and how the recording was made; the
+> narration it speaks is in `demo-output/narration/`. The script below is what it follows,
+> expanded; where the two differ, the recording is what was actually shot.
+
 A script for the demo video. The aim is one complete moment: a real user action through to a
 visible result, with NEAR's part in it said concretely rather than vaguely.
 

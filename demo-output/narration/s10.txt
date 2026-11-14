@@ -1,0 +1,1 @@
+Here is one of those rounds, running on testnet. The buyer's maximum goes into escrow, and the contract opens the round. Five agents commit sealed bids: what the contract stores is a hash, not a price. When the window closes they reveal, it rechecks every hash, and the lowest bid takes the risk and locks the full payout as collateral.
