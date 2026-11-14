@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Archivo } from "next/font/google";
 import { Nav } from "@/components/nav";
 import { Logo, Mark } from "@/components/logo";
+import { WalletProvider } from "@/components/wallet";
+import { ConnectButton } from "@/components/connect-button";
 import "./globals.css";
 
 // Archivo is variable on both weight and width. next/font ships weight only unless the
@@ -40,19 +42,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: MOTION_FLAG }} />
       </head>
       <body>
-        <header className="top">
-          <div className="inner">
-            <a href="/" className="brand" aria-label="Mmiri, home">
-              <Logo />
-            </a>
-            <Nav />
-            <a className="cta-sm" href={`https://testnet.nearblocks.io/address/${MARKET}`}>
-              Live on testnet
-            </a>
-          </div>
-        </header>
+        <WalletProvider>
+          <header className="top">
+            <div className="inner">
+              <a href="/" className="brand" aria-label="Mmiri, home">
+                <Logo />
+              </a>
+              <Nav />
+              <ConnectButton />
+            </div>
+          </header>
 
-        <div className="shell">{children}</div>
+          <div className="shell">{children}</div>
+        </WalletProvider>
 
         <footer className="site-foot">
           <div className="inner">

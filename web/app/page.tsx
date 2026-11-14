@@ -4,6 +4,7 @@ import { Reveal } from "@/components/reveal";
 import { Rise, CountUp } from "@/components/on-view";
 import { SiteMap } from "@/components/site-map";
 import { SiteControls } from "@/components/site-controls";
+import { RequestCover } from "@/components/request-cover";
 import {
   SITE_ORDER,
   defaultStrike,
@@ -356,6 +357,23 @@ export default async function Home({
             </table>
           </div>
         </div>
+
+        <RequestCover
+          terms={{
+            lat_e4: s.lat_e4,
+            lon_e4: s.lon_e4,
+            start: Number(`${SEASON}${s.window_start_mmdd}`),
+            days: 30,
+            strike_mm_x10: strike,
+            payout: payout.toString(),
+          }}
+          // Half the payout, the same ceiling scripts/demo uses. You pay the winning bid,
+          // not this, and the rest comes back when the round clears.
+          maxPremium={(payout / 2n).toString()}
+          siteName={s.name}
+          windowLabel={`${windowLabel(s)} ${SEASON}`}
+          expectedPremium={best ? fmtUsdc(best.q.premium!) : null}
+        />
 
         {best && dearest ? (
           <div className="notice info">

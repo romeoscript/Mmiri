@@ -639,7 +639,8 @@ button.secondary {
   white-space: nowrap;
   transition: border-color 160ms ease, background-color 160ms ease;
 }
-.cta-sm::before {
+/* The dot means "this is live", so it belongs to that one use and not to every pill. */
+.cta-sm.is-live::before {
   content: "";
   width: 7px;
   height: 7px;
@@ -649,6 +650,115 @@ button.secondary {
 .cta-sm:hover {
   border-color: var(--paper);
   background: color-mix(in srgb, var(--paper) 7%, transparent);
+}
+/* As a <button> it would otherwise inherit the filled global button style. */
+button.cta-sm {
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  background: transparent;
+  color: var(--paper);
+  cursor: pointer;
+}
+.cta-sm.is-idle {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* ---------------- wallet ---------------- */
+
+.wallet-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  padding: 0.3rem 0.4rem 0.3rem 0.85rem;
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+.wallet-id {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.wallet-out {
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: color-mix(in srgb, var(--paper) 9%, transparent);
+  color: var(--silt);
+  border: none;
+  border-radius: 999px;
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+}
+.wallet-out:hover {
+  color: var(--paper);
+  background: color-mix(in srgb, var(--paper) 16%, transparent);
+}
+
+/* ---------------- buy flow ---------------- */
+
+.buy {
+  border: 1px solid var(--rule-strong);
+  border-radius: 8px;
+  background: var(--ink-2);
+  padding: clamp(1.1rem, 2.5vw, 1.75rem);
+  margin-top: 1.5rem;
+}
+.buy-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+.buy-summary h3 {
+  margin: 0 0 0.25rem;
+}
+.buy-summary p {
+  margin: 0;
+  max-width: 52ch;
+}
+.buy-price {
+  text-align: right;
+}
+.buy-price-value {
+  display: block;
+  font-stretch: 125%;
+  font-weight: 700;
+  font-size: clamp(1.75rem, 3vw, 2.375rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--rain);
+}
+.buy-price-label {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--silt);
+  margin-top: 0.3rem;
+}
+.buy-expect {
+  margin: 1rem 0 0;
+  max-width: 62ch;
+}
+.buy-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1.25rem;
+}
+.buy-balance {
+  font-size: 0.8125rem;
+  color: var(--silt);
+  font-variant-numeric: tabular-nums;
+}
+.buy-foot {
+  margin: 1.25rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--rule);
+  max-width: 68ch;
 }
 
 /* ---------------- buttons ---------------- */
